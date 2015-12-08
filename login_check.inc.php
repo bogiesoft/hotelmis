@@ -41,16 +41,14 @@ if(!isset($_COOKIE['data_login'])){
 }
 
 if($data_login) {     // if the cookie does exsist
-  mysql_connect("localhost","root","sa") or die ("Whoops");  //connect to db
   $user = explode(" ","$data_login");   //explode cookie value (which is the '$username $password (note seperated by space)) and store values in $user. Check manual for more info on explode()
-  $sql = "select * from users where loginname='$user[0]'";  //sql statment that uses the username from the cookie.
-  $r = mysql_db_query("hotelmis",$sql);  //execute sql
+  $r = db_query( 'SELECT * FROM users WHERE loginname = ?', array( $user[ 0 ] ) );  //execute sql
 
-  if(!mysql_num_rows($r)) {    // if there are no rows, means no matches for that username
+  if ( ! $r->rowCount() ) {    // if there are no rows, means no matches for that username
     header("Location: index.php");   // so go back to the login page
   }
 
- 	$chkusr = mysql_fetch_array($r); //if we got passed the last part, then get the username/password set that match that username
+ 	$chkusr = $r->fetch( PDO::FETCH_ASSOC ); //if we got passed the last part, then get the username/password set that match that username
 	/*if(unserialize(stripslashes($user[1])) != $chkusr[2]){ //if the password from cookie (notice we have to unserialize it) doesn't match the one from the database
     	header("Location: userrequest.php");    // go back to the login page
 	}*/
@@ -103,4 +101,3 @@ function access($page){
 	}
 	if ($access==0) exit("If you were brough over here it's because you do not have permission to view this page.");//header("Location: index.php");
 }
-?>

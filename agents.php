@@ -22,11 +22,10 @@ For any details please feel free to contact me at taifa@users.sourceforge.net
 Or for snail mail. P. O. Box 938, Kilifi-80108, East Africa-Kenya.
 /*****************************************************************************/
 error_reporting(E_ALL & ~E_NOTICE);
-include_once("login_check.inc.php");
 include_once ("queryfunctions.php");
+include_once("login_check.inc.php");
 include_once ("functions.php");
 access("agents"); //check if user is allowed to access this page
-$conn=db_connect(HOST,USER,PASS,DB,PORT);
 
 if (isset($_GET["search"])){
 	find($_GET["search"]);
@@ -63,13 +62,13 @@ if (isset($_POST['Submit'])){
 				$road_street=(!empty($_POST["road_street"])) ? $_POST["road_street"] : 'NULL';
 				$building=(!empty($_POST["building"])) ? $_POST["building"] : 'NULL';
 				//SELECT agentid,agentname,agents_ac_no,contact_person, telephone, fax,email,billing_address,town,postal_code,road_street, building,ratesid FROM agents
-				$sql="INSERT INTO agents (agentname,agents_ac_no,contact_person,telephone,fax,email,billing_address,town,postal_code,road_street,building)
-				 VALUES('$agentname','$agents_ac_no','$contact_person','$telephone',$fax,$email,$billing_address,'$town',$postal_code,$road_street,$building)";
-				//echo $sql; 
-				$results=mkr_query($sql,$conn);
-				if ((int) $results==0){
+				$results = db_query( '
+					INSERT INTO agents (agentname, agents_ac_no, contact_person, telephone,fax, email, billing_address, town, postal_code, road_street, building)
+					VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+					array( $agentname, $agents_ac_no, $contact_person, $telephone, $fax, $email, $billing_address, $town, $postal_code, $road_street, $building ) );
+				if ( ! $results || $results->rowCount() == 0 ) {
 					//should log mysql errors to a file instead of displaying them to the user
-					echo 'Invalid query: ' . mysql_errno($conn). "<br>" . ": " . mysql_error($conn). "<br>";
+					echo 'Invalid query: ' . db_errno(). "<br>" . ": " . db_error(). "<br>";
 					echo "Agents record NOT UPDATED.";  //return;
 				}else{
 					echo "Agents record successful updated.";
@@ -87,12 +86,13 @@ if (isset($_POST['Submit'])){
 
 }
 
-function find($search){
-	global $conn,$agent;
-	$search=$search;
-	$sql="Select agentname,agents_ac_no,contact_person,telephone,fax,email,billing_address,town,postal_code,road_street,building From agents where agents_ac_no='$search'";
-	$results=mkr_query($sql,$conn);
-	$agent=fetch_object($results);
+function find( $search ) {
+	global $agent;
+	$results = db_query( '
+		SELECT agentname, agents_ac_no, contact_person, telephone, fax, email, billing_address, town, postal_code, road_street, building
+		FROM agents WHERE agents_ac_no = ?',
+		array( $search ) );
+	$agent = $results->fetch();
 }
 ?>
 

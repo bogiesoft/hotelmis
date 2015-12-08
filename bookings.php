@@ -22,12 +22,11 @@ For any details please feel free to contact me at taifa@users.sourceforge.net
 Or for snail mail. P. O. Box 938, Kilifi-80108, East Africa-Kenya.
 /*****************************************************************************/
 error_reporting(E_ALL & ~E_NOTICE);
-include_once("login_check.inc.php");
 include_once ("queryfunctions.php");
+include_once("login_check.inc.php");
 include_once ("functions.php");
 
 access("booking"); //check if user is allowed to access this page
-$conn=db_connect(HOST,USER,PASS,DB,PORT);
 
 //if page was visited through a search hyperlin.
 if (isset($_GET["search"]) && !empty($_GET["search"])){
@@ -37,9 +36,8 @@ if (isset($_GET["search"]) && !empty($_GET["search"])){
 //consider having this as a function in the functions.php
 if (isset($_POST['Navigate'])){
 	//echo $_SESSION["strOffSet"];
-	$nRecords=num_rows(mkr_query("select * from guests",$conn),$conn);
+	$nRecords = db_query( 'SELECT * FROM guests' )->rowCount(); // @todo Refactor in a more efficient way.
 	paginate($nRecords);
-	free_result($results);
 	find($_SESSION["strOffSet"]);	
 }
 
@@ -81,37 +79,37 @@ if (isset($_POST['Submit'])){
 				$roomid=$_POST["roomid"];
 				$checkedin_by=1; //$_POST["checkedin_by"];
 				$invoice_no=!empty($_POST["invoice_no"]) ? $_POST["invoice_no"] : 'NULL';
-				$sql="INSERT INTO booking (guestid,booking_type,meal_plan,no_adults,no_child,checkin_date,checkout_date,
-					residence_id,payment_mode,agents_ac_no,roomid,checkedin_by,invoice_no,billed)
-				 VALUES($guestid,'$booking_type','$meal_plan',$no_adults,$no_child,$checkin_date,$checkout_date,
-					'$residence_id',$payment_mode,$agents_ac_no,$roomid,$checkedin_by,$invoice_no,0)";
-				$results=mkr_query($sql,$conn);
-				if ((int) $results==0){
+				$results = db_query( '
+					INSERT INTO booking (guestid, booking_type, meal_plan, no_adults, no_child, checkin_date, checkout_date,
+						residence_id, payment_mode, agents_ac_no, roomid, checkedin_by, invoice_no, billed)
+					VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)',
+					array( $guestid, $booking_type, $meal_plan, $no_adults, $no_child, $checkin_date, $checkout_date,
+						$residence_id, $payment_mode, $agents_ac_no, $roomid, $checkedin_by, $invoice_no ) );
+				if ( !$results || $results->rowCount() == 0 ) {
 					//should log mysql errors to a file instead of displaying them to the user
-					echo 'Invalid query: ' . mysql_errno($conn). "<br>" . ": " . mysql_error($conn). "<br>";
+					echo 'Invalid query: ' . db_errno(). "<br>" . ": " . db_error(). "<br>";
 					echo "Guests NOT BOOKED.";  //return;
 				}else{
 					echo "<div align=\"center\"><h1>Guests successful checked in.</h1></div>";
 					//create bill - let user creat bill/create bill automatically
-					$sql="INSERT INTO bills (book_id,billno,date_billed) select booking.book_id,booking.book_id,booking.checkin_date from booking where booking.billed=0";
-					$results=mkr_query($sql,$conn);
+					$results = db_query( 'INSERT INTO bills (book_id, billno, date_billed) SELECT booking.book_id, booking.book_id, booking.checkin_date FROM booking WHERE booking.billed = 0' );
 					$msg[0]="Sorry no bill created";
 					$msg[1]="Bill successfull created";
-					AddSuccess($results,$conn,$msg);
+					AddSuccess( $results, $msg );
 		
 					//if bill succesful created update billed to 1 in bookings- todo
-					$sql="Update booking set billed=1 where billed=0"; //get the actual updated book_id, currently this simply updates all bookings 
-					$results=mkr_query($sql,$conn);
+					//get the actual updated book_id, currently this simply updates all bookings 
+					$results = db_query( 'UPDATE booking SET billed = 1 WHERE billed = 0' );
 					$msg[0]="Sorry Booking not updated";
 					$msg[1]="Booking successful updated";			
-					AddSuccess($results,$conn,$msg);
+					AddSuccess( $results, $msg );
 					
 					//mark room as booked
-					$sql="Update rooms set status='B' where roomid=$roomid"; //get the actual updated book_id, currently this simply updates all bookings 
-					$results=mkr_query($sql,$conn);
+					//get the actual updated book_id, currently this simply updates all bookings 
+					$results = db_query( 'UPDATE rooms SET status = ? WHERE roomid = ?', array( 'B', $roomid ) );
 					$msg[0]="Sorry room occupation not marked";
 					$msg[1]="Room marked as occupied";
-					AddSuccess($results,$conn,$msg);
+					AddSuccess( $results, $msg );
 				}				
 			}			
 			find($guestid);
@@ -120,35 +118,34 @@ if (isset($_POST['Submit'])){
 			//check if user is searching using name, payrollno, national id number or other fields
 			$search=$_POST["search"];
 			find($search);
-			$sql="Select guests.guestid,guests.lastname,guests.firstname,guests.middlename,guests.pp_no,
-			guests.idno,guests.countrycode,guests.pobox,guests.town,guests.postal_code,guests.phone,
-			guests.email,guests.mobilephone,countries.country
-			From guests
-			Inner Join countries ON guests.countrycode = countries.countrycode where pp_no='$search'
-			LIMIT $strOffSet,1";
-			$results=mkr_query($sql,$conn);
-			$bookings=fetch_object($results);
+			$results = db_query( '
+				SELECT guests.guestid, guests.lastname, guests.firstname, guests.middlename, guests.pp_no,
+					guests.idno, guests.countrycode, guests.pobox, guests.town, guests.postal_code, guests.phone,
+					guests.email, guests.mobilephone, countries.country
+				FROM guests
+				INNER JOIN countries ON guests.countrycode = countries.countrycode
+				WHERE pp_no = ?
+				LIMIT ?, 1', array( $search, $strOffSet ) );
+			$bookings = $results->fetch();
 			break;
 	}
 }
 
 function find($search){
-	global $conn,$bookings;
-	$search=$search;
+	global $bookings;
 	$strOffSet=!empty($_POST["strOffSet"]) ? $_POST["strOffSet"] : 0; //offset value peacked on all pages with pagination - logical error
-		
 	//check on wether search is being done on idno/ppno/guestid/guestname
-	$sql="Select guests.guestid,concat_ws(' ',guests.firstname,guests.middlename,guests.lastname) as guest,guests.pp_no,
-		guests.idno,guests.countrycode,guests.pobox,guests.town,guests.postal_code,guests.phone,guests.email,guests.mobilephone,
-		countries.country,booking.book_id,booking.guestid,booking.booking_type,booking.meal_plan,booking.no_adults,booking.no_child,
-		booking.checkin_date,booking.checkout_date,booking.residence_id,booking.payment_mode,booking.agents_ac_no,booking.roomid,
-		booking.checkedin_by,booking.invoice_no,booking.billed,booking.checkoutby,booking.codatetime,DATEDIFF(booking.checkout_date,booking.checkin_date) as no_nights
-		From guests
-		Inner Join countries ON guests.countrycode = countries.countrycode
-		Inner Join booking ON guests.guestid = booking.guestid
-		where booking.book_id='$search'";
-	$results=mkr_query($sql,$conn);
-	$bookings=fetch_object($results);
+	$results = db_query( '
+		SELECT guests.guestid, CONCAT_WS(" ", guests.firstname, guests.middlename, guests.lastname) AS guest, guests.pp_no,
+			guests.idno, guests.countrycode, guests.pobox, guests.town, guests.postal_code, guests.phone, guests.email, guests.mobilephone,
+			countries.country, booking.book_id, booking.guestid, booking.booking_type, booking.meal_plan, booking.no_adults, booking.no_child,
+			booking.checkin_date, booking.checkout_date, booking.residence_id, booking.payment_mode, booking.agents_ac_no, booking.roomid,
+			booking.checkedin_by, booking.invoice_no, booking.billed, booking.checkoutby, booking.codatetime, DATEDIFF(booking.checkout_date, booking.checkin_date) AS no_nights
+		FROM guests
+		INNER JOIN countries ON guests.countrycode = countries.countrycode
+		INNER JOIN booking ON guests.guestid = booking.guestid
+		WHERE booking.book_id = ?', array( $search ) );
+	$bookings = $results->fetch();
 }
 
 ?>

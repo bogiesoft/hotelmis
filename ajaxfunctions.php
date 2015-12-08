@@ -30,18 +30,18 @@ switch ($_POST["button"]){
 		agents();
 		break;		
 	case "GetRates":
-		$conn=db_connect(HOST,USER,PASS,DB,PORT);
 		//check room availability		
 		$roomid=$_POST["roomid"];
-		$sql="Select rooms.roomid,rooms.roomno,rooms.status,booking.checkin_date,booking.checkout_date
-		From rooms
-		Left Join booking ON rooms.roomid = booking.roomid
-		Where rooms.status = 'V' and rooms.roomid=$roomid";
-		$results=mkr_query($sql,$conn);
+		$results = db_query( '
+			SELECT rooms.roomid, rooms.roomno, rooms.status, booking.checkin_date, booking.checkout_date
+			FROM rooms
+			LEFT JOIN booking ON rooms.roomid = booking.roomid
+			WHERE rooms.status = ? and rooms.roomid = ?',
+			array( 'V', $roomid ) );
 		$msg[0]="";
 		$msg[1]="";
-		AddSuccess($results,$conn,$msg);
-		if (num_rows($results)==0){
+		AddSuccess( $results, $msg );
+		if ( $results && $results->rowCount() == 0 ) {
 			//rooms.status - could tell if room is locked/booked/reserverd/vacant
 			//get room id and find out status - to do
 			echo "<h2><blink>Sorry room is either occupied or reserved</blink></h2>";
@@ -108,11 +108,8 @@ switch ($_GET["submit"]){
 }
 
 function rates_table(){
-	$conn=db_connect(HOST,USER,PASS,DB,PORT);
-	$sql="Select ratesid,bookingtype,occupancy,rate_type,bo,bb,hb,fb,currency,date_started,date_stopped From rates";
-
-	$rates=mkr_query($sql,$conn);
-	$n=mysql_num_fields($rates);
+	$rates = db_query( 'SELECT ratesid, bookingtype, occupancy, rate_type, bo, bb, hb, fb, currency, date_started, date_stopped FROM rates' );
+	$n = $rates->columnCount();
 	echo "<table valign=\"top\">";
 	//get field names to create the column header
 	echo "<tr bgcolor=\"#009999\">
@@ -130,7 +127,7 @@ function rates_table(){
 		</tr>";
 	//end of field header
 	//get data from selected table on the selected fields
-	while ($row = fetch_object($rates)) {
+	while ( $row = $rates->fetch() ) {
 		//alternate row colour
 		$j++;
 		if($j%2==1){
@@ -156,11 +153,8 @@ function rates_table(){
 }
 
 function rooms_details(){
-	$conn=db_connect(HOST,USER,PASS,DB,PORT);
-	$sql="Select roomid,roomno,roomtypeid,roomname,noofrooms,occupancy,tv,aircondition,fun,safe,fridge,status,photo From rooms";
-
-	$rates=mkr_query($sql,$conn);
-	$n=mysql_num_fields($rates);
+	$rates = db_query( 'SELECT roomid, roomno, roomtypeid, roomname, noofrooms, occupancy, tv, aircondition, fun, safe, fridge, status, photo FROM rooms' );
+	$n = $rates->columnCount();
 	echo "<table valign=\"top\">";
 	//get field names to create the column header
 	echo "<tr bgcolor=\"#009999\">
@@ -179,7 +173,7 @@ function rooms_details(){
 		</tr>";
 	//end of field header
 	//get data from selected table on the selected fields
-	while ($row = fetch_object($rates)) {
+	while ( $row = $rates->fetch() ) {
 		//alternate row colour
 		$j++;
 		if($j%2==1){
@@ -205,10 +199,7 @@ function rooms_details(){
 }
 
 function bills_details(){
-	$conn=db_connect(HOST,USER,PASS,DB,PORT);
-	$sql="SELECT bill_id,book_id,date_billed,billno,status,date_checked FROM bills";
-
-	$bills=mkr_query($sql,$conn);
+	$bills = db_query( 'SELECT bill_id, book_id, date_billed, billno, status, date_checked FROM bills' );
 	//$n=mysql_num_fields($bills);
 	echo "<table valign=\"top\">";
 	//get field names to create the column header
@@ -223,7 +214,7 @@ function bills_details(){
 		</tr>";
 	//end of field header
 	//get data from selected table on the selected fields
-	while ($row = fetch_object($bills)) {
+	while ( $row = $bills->fetch() ) {
 		//alternate row colour
 		$j++;
 		if($j%2==1){
@@ -244,10 +235,7 @@ function bills_details(){
 }
 
 function transdetails(){
-	$conn=db_connect(HOST,USER,PASS,DB,PORT);
-	$sql="Select itemid,item,description,sale,expense From details";
-
-	$bills=mkr_query($sql,$conn);
+	$bills = db_query( 'SELECT itemid, item, description, sale, expense FROM details' );
 	//$n=mysql_num_fields($bills);
 	echo "<table valign=\"top\">";
 	//get field names to create the column header
@@ -260,7 +248,7 @@ function transdetails(){
 		</tr>";
 	//end of field header
 	//get data from selected table on the selected fields
-	while ($row = fetch_object($bills)) {
+	while ( $row = $bills->fetch() ) {
 		//alternate row colour
 		$j++;
 		if($j%2==1){
@@ -280,10 +268,7 @@ function transdetails(){
 }
 
 function Documents(){
-	$conn=db_connect(HOST,USER,PASS,DB,PORT);
-	$sql="Select doc_id,doc_code,doc_type,remarks,accounts,cooperative,payroll From doctypes";
-
-	$docs=mkr_query($sql,$conn);
+	$docs = db_query( 'SELECT doc_id, doc_code, doc_type, remarks, accounts, cooperative, payroll FROM doctypes' );
 	//$n=mysql_num_fields($bills);
 	echo "<table valign=\"top\">";
 	//get field names to create the column header
@@ -298,7 +283,7 @@ function Documents(){
 		</tr>";
 	//end of field header
 	//get data from selected table on the selected fields
-	while ($row = fetch_object($docs)) {
+	while ( $row = $docs->fetch() ) {
 		//alternate row colour
 		$j++;
 		if($j%2==1){
@@ -309,8 +294,8 @@ function Documents(){
 			/*echo "<td>" . $row->doc_id . "</td>";*/
 			//
 			$i = 0;
-			while ($i < mysql_num_fields($docs)) {
-				$meta = mysql_fetch_field($docs, $i);
+			while ( $i < $docs->columnCount() ) {
+				$meta = $docs->fetchColumn( $i );
 				$field=$meta->name;
 				echo "<td>" . $row->$field . "</td>";
 				$i++;
@@ -319,13 +304,11 @@ function Documents(){
 		echo "</tr>"; //end of - data rows
 	} //end of while row
 	echo "</table>";
-	mysql_free_result($docs);
+	$docs->closeCursor();
 }
 
 function Transtypes(){
-	$conn=db_connect(HOST,USER,PASS,DB,PORT);
-	$sql="Select trans_id,trans_code,trans_type,remarks,accounts,cooperative,payroll From transtype";
-	$trans=mkr_query($sql,$conn);
+	$trans = db_query( 'SELECT trans_id, trans_code, trans_type, remarks, accounts, cooperative, payroll FROM transtype' );
 	//$n=mysql_num_fields($bills);
 	echo "<table valign=\"top\">";
 	//get field names to create the column header
@@ -340,7 +323,7 @@ function Transtypes(){
 		</tr>";
 	//end of field header
 	//get data from selected table on the selected fields
-	while ($row = fetch_object($trans)) {
+	while ( $row = $trans->fetch() ) {
 		//alternate row colour
 		$j++;
 		if($j%2==1){
@@ -351,8 +334,8 @@ function Transtypes(){
 			/*echo "<td>" . $row->doc_id . "</td>";*/
 			//
 			$i = 0;
-			while ($i < mysql_num_fields($trans)) {
-				$meta = mysql_fetch_field($trans, $i);
+			while ( $i < $trans->columnCount( $trans ) ) {
+				$meta = $trans->fetchColumn( $i );
 				$field=$meta->name;
 				echo "<td>" . $row->$field . "</td>";
 				$i++;
@@ -361,14 +344,12 @@ function Transtypes(){
 		echo "</tr>"; //end of - data rows
 	} //end of while row
 	echo "</table>";
-	mysql_free_result($trans);
+	$trans->closeCursor();
 }
 
 
 function PaymentMode(){
-	$conn=db_connect(HOST,USER,PASS,DB,PORT);
-	$sql="Select paymentid,payment_option From payment_mode";
-	$paymode=mkr_query($sql,$conn);
+	$paymode = db_query( 'SELECT paymentid, payment_option FROM payment_mode' );
 	//$n=mysql_num_fields($bills);
 	echo "<table valign=\"top\">";
 	//get field names to create the column header
@@ -379,7 +360,7 @@ function PaymentMode(){
 	//end of field header
 	//get data from selected table on the selected fields
 	//consider having this as a function - is being called in several places
-	while ($row = fetch_object($paymode)) {
+	while ( $row = $paymode->fetch() ) {
 		//alternate row colour
 		$j++;
 		if($j%2==1){
@@ -388,8 +369,8 @@ function PaymentMode(){
 			echo "<tr id=\"row$j\" onmouseover=\"javascript:setColor('$j')\" onmouseout=\"javascript:origColor('$j')\" bgcolor=\"#EEEEF8\">";
 		}
 			$i = 0;
-			while ($i < mysql_num_fields($paymode)) {
-				$meta = mysql_fetch_field($paymode, $i);
+			while ( $i < $paymode->columnCount() ) {
+				$meta = $paymode->fetchColumn( $i );
 				$field=$meta->name;
 				echo "<td>" . $row->$field . "</td>";
 				$i++;
@@ -397,13 +378,11 @@ function PaymentMode(){
 		echo "</tr>"; //end of - data rows
 	} //end of while row
 	echo "</table>";
-	mysql_free_result($paymode);
+	$paymode->closeCursor();
 }
 
 function room_types(){
-	$conn=db_connect(HOST,USER,PASS,DB,PORT);
-	$sql="SELECT * FROM roomtype";
-	$roomtype=mkr_query($sql,$conn);
+	$roomtype = db_query( 'SELECT * FROM roomtype' );
 	//$n=mysql_num_fields($bills);
 	echo "<table valign=\"top\">";
 	//get field names to create the column header
@@ -415,7 +394,7 @@ function room_types(){
 	//end of field header
 	//get data from selected table on the selected fields
 	//consider having this as a function - is being called in several places - todo
-	while ($row = fetch_object($roomtype)) {
+	while ( $row = $roomtype->fetch() ) {
 		//alternate row colour
 		$j++;
 		if($j%2==1){
@@ -424,8 +403,8 @@ function room_types(){
 			echo "<tr id=\"row$j\" onmouseover=\"javascript:setColor('$j')\" onmouseout=\"javascript:origColor('$j')\" bgcolor=\"#EEEEF8\">";
 		}
 			$i = 0;
-			while ($i < mysql_num_fields($roomtype)) {
-				$meta = mysql_fetch_field($roomtype, $i);
+			while ( $i < $roomtype->columnCount() ) {
+				$meta = $roomtype->fetchColumn( $i );
 				$field=$meta->name;
 				echo "<td>" . $row->$field . "</td>";
 				$i++;
@@ -433,7 +412,7 @@ function room_types(){
 		echo "</tr>"; //end of - data rows
 	} //end of while row
 	echo "</table>";
-	mysql_free_result($roomtype);
+	$roomtype->closeCursor();
 }
 
 function agents(){
@@ -490,11 +469,11 @@ function trans_type(){
 function updatebill(){
 	$billno=!empty($_POST['search']) ? $_POST['search'] : 0;
 	//$billno=!empty($_POST['billid']) ? $_POST['billid'] : 1;
-	$sql="Select transactions.doc_date,details.item,transactions.dr,transactions.cr,transactions.doc_no,transactions.doc_type,details.itemid
-		From transactions
-		Inner Join details ON transactions.details = details.itemid
-		Where transactions.billno = '$search'";
-	$results=mkr_query($sql,$conn);
+	$results = db_query( '
+		SELECT transactions.doc_date, details.item, transactions.dr, transactions.cr, transactions.doc_no, transactions.doc_type, details.itemid
+		FROM transactions
+		INNER JOIN details ON transactions.details = details.itemid
+		WHERE transactions.billno = ?', array( $search ) );
 
 	echo "<table width=\"100%\"  border=\"0\" cellpadding=\"1\">
 	  <tr bgcolor=\"#FF9900\">
@@ -508,7 +487,7 @@ function updatebill(){
 		<th>Doc. Type</th>					
 	  </tr>";
 	//get data from selected table on the selected fields
-	while ($trans = fetch_object($results)) {
+	while ( $trans = $results->fetch() ) {
 		$balance=$balance-$trans->cr+$trans->dr;
 		//alternate row colour
 		$j++;
@@ -530,4 +509,3 @@ function updatebill(){
 	echo "<tr><td colspan=\"3\" align=\"center\"><b>TOTAL</b></td><td><b>DR Total</b></td><td><b>CR Total</b></td><td><b>Total Bal.</b></td><tr>";
 	echo "</table>";
 }
-?>

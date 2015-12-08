@@ -22,12 +22,11 @@ For any details please feel free to contact me at taifa@users.sourceforge.net
 Or for snail mail. P. O. Box 938, Kilifi-80108, East Africa-Kenya.
 /*****************************************************************************/
 error_reporting(E_ALL & ~E_NOTICE);
-include_once("login_check.inc.php");
 include_once ("queryfunctions.php");
+include_once("login_check.inc.php");
 include_once ("functions.php");
 
 access("reservation"); //check if user is allowed to access this page
-$conn=db_connect(HOST,USER,PASS,DB,PORT);
 
 if (isset($_GET["search"]) && !empty($_GET["search"])){
 	find($_GET["search"]);
@@ -35,9 +34,8 @@ if (isset($_GET["search"]) && !empty($_GET["search"])){
 
 if (isset($_POST['Navigate'])){
 	//echo $_SESSION["strOffSet"];
-	$nRecords=num_rows(mkr_query("select * from guests",$conn),$conn);
+	$nRecords = db_query( 'SELECT * FROM guests' )->rowCount();
 	paginate($nRecords);
-	free_result($results);
 	find($_SESSION["strOffSet"]);
 }
 
@@ -87,16 +85,17 @@ if (isset($_POST['Submit'])){
 				$confirmed_date=!empty($_POST["confirmed_date"]) ? "'" . $_POST["confirmed_date"] . "'" : 'NULL';
 				$roomid=!empty($_POST["roomid"]) ? $_POST["roomid"] : 'NULL';
 				
-				$sql="INSERT INTO reservation (reserved_through,guestid,reservation_by,reservation_by_phone,datereserved,
-						reserve_checkindate,reserve_checkoutdate,no_adults,no_child0_5,no_child6_12,no_babies,meal_plan,
-						billing_instructions,deposit,agents_ac_no,voucher_no,reserved_by,date_reserved,confirmed_by,confirmed_date,roomid,billed)
-					 VALUES($reserved_through,$guestid,$reservation_by,$reservation_by_phone,now(),
-						$reserve_checkindate,$reserve_checkoutdate,$no_adults,$no_child0_5,$no_child6_12,$no_babies,'$meal_plan',
-						$billing_instructions,$deposit,$agents_ac_no,$voucher_no,$reserved_by,$date_reserved,$confirmed_by,$confirmed_date,$roomid,0)";
-				$results=mkr_query($sql,$conn);
-				if ((int) $results==0){
+				$results = db_query( '
+					INSERT INTO reservation (reserved_through, guestid, reservation_by, reservation_by_phone, datereserved,
+						reserve_checkindate, reserve_checkoutdate, no_adults, no_child0_5, no_child6_12, no_babies, meal_plan,
+						billing_instructions, deposit, agents_ac_no, voucher_no, reserved_by, date_reserved, confirmed_by, confirmed_date, roomid, billed)
+					VALUES(?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)',
+					array( $reserved_through, $guestid, $reservation_by, $reservation_by_phone, $reserve_checkindate,
+						$reserve_checkoutdate, $no_adults, $no_child0_5, $no_child6_12, $no_babies, $meal_plan,
+						$billing_instructions, $deposit, $agents_ac_no, $voucher_no, $reserved_by, $date_reserved, $confirmed_by, $confirmed_date, $roomid ) );
+				if ( ! $results || $results->rowCount() == 0 ) {
 					//should log mysql errors to a file instead of displaying them to the user
-					echo 'Invalid query: ' . mysql_errno($conn). "<br>" . ": " . mysql_error($conn). "<br>";
+					echo 'Invalid query: ' . db_errno(). "<br>" . ": " . db_error(). "<br>";
 					echo "Reservation NOT MADE.";  //return;
 				}else{
 					echo "<div align=\"center\"><h1>Reservation successfull.</h1></div>";
@@ -104,32 +103,30 @@ if (isset($_POST['Submit'])){
 					//only create bill when deposit has been payed.(Give a setup option to the user for this) - todo
 					if (!empty($_POST["deposit"])){
 						//create bill - let user creat bill/create bill automatically
-						$sql="INSERT INTO bills (book_id,billno,date_billed) select reservation.reservation_id,reservation.reservation_id,reservation.datereserved from reservation where reservation.billed=0";
-						$results=mkr_query($sql,$conn);
+						$results = db_query( 'INSERT INTO bills (book_id, billno, date_billed) SELECT reservation.reservation_id, reservation.reservation_id, reservation.datereserved FROM reservation WHERE reservation.billed = 0' );
 						$msg[0]="Sorry no bill created";
 						$msg[1]="Bill successfull created";
-						AddSuccess($results,$conn,$msg);
+						AddSuccess( $results, $msg );
 						
 						//if bill succesful created update billed to 1 in bookings- todo
-						$sql="Update reservation set billed=1 where billed=0"; //get the actual updated reservation_id, currently this simply updates all reservations that have not been billed
-						$results=mkr_query($sql,$conn);
+						//get the actual updated reservation_id, currently this simply updates all reservations that have not been billed
+						$results = db_query( 'UPDATE reservation SET billed = 1 WHERE billed = 0' );
 						$msg[0]="Sorry Reservation not updated";
 						$msg[1]="Reservations successful updated";			
-						AddSuccess($results,$conn,$msg);
+						AddSuccess( $results, $msg );
 					}else{
 						echo "<div align=\"center\"><h1>Bill/Reservation will be created on deposit</h1></div>";
 					}
 		
 					//mark room as booked
-					$sql="Update rooms set status='R' where roomid=$roomid"; //get the actual updated book_id, currently this simply updates all bookings 
-					$results=mkr_query($sql,$conn);
+					//get the actual updated book_id, currently this simply updates all bookings 
+					$results = db_query( 'UPDATE rooms SET status = ? WHERE roomid = ?', array( 'R', $roomid ) );
 					$msg[0]="Sorry room reservation not marked";
 					$msg[1]="Room marked as reserved";			
-					AddSuccess($results,$conn,$msg);					
+					AddSuccess( $results, $msg );					
 				}				
 			}			
 			find($guestid);
-			$results=mkr_query($sql,$conn);		
 			break;
 		case 'List':
 			break;
@@ -137,20 +134,20 @@ if (isset($_POST['Submit'])){
 			//check if user is searching using name, payrollno, national id number or other fields
 			$search=$_POST["search"];
 			find($search);
-			$sql="Select guests.guestid,guests.lastname,guests.firstname,guests.middlename,guests.pp_no,
-			guests.idno,guests.countrycode,guests.pobox,guests.town,guests.postal_code,guests.phone,
-			guests.email,guests.mobilephone,countries.country
-			From guests
-			Inner Join countries ON guests.countrycode = countries.countrycode where pp_no='$search'";
-			$results=mkr_query($sql,$conn);
-			$reservation=fetch_object($results);
+			$results = db_query( '
+				SELECT guests.guestid, guests.lastname, guests.firstname, guests.middlename, guests.pp_no,
+					guests.idno, guests.countrycode, guests.pobox, guests.town, guests.postal_code, guests.phone,
+					guests.email, guests.mobilephone, countries.country
+				FROM guests
+				INNER JOIN countries ON guests.countrycode = countries.countrycode
+				WHERE pp_no = ?', array( $search ) );
+			$reservation = $results->fetch();
 			break;
 	}
 }
 
 function find($search){
-	global $conn,$guests;
-	$search=$search;
+	global $guests;
 	$strOffSet=!empty($_POST["strOffSet"]) ? $_POST["strOffSet"] : 0; //offset value peacked on all pages with pagination - logical error
 	
 	//check on wether search is being done on idno/ppno/guestid/guestname
@@ -160,8 +157,15 @@ function find($search){
 		From guests
 		Inner Join countries ON guests.countrycode = countries.countrycode where guests.guestid='$search'
 		LIMIT $strOffSet,1";
-	$results=mkr_query($sql,$conn);
-	$guests=fetch_object($results);
+	$results = db_query( '
+		SELECT guests.guestid, CONCAT_WS(" ", guests.firstname, guests.middlename, guests.lastname) AS guest, guests.pp_no,
+			guests.idno, guests.countrycode, guests.pobox, guests.town, guests.postal_code, guests.phone,
+			guests.email, guests.mobilephone, countries.country
+		FROM guests
+		INNER JOIN countries ON guests.countrycode = countries.countrycode
+		WHERE guests.guestid = ?
+		LIMIT ?, 1', array( $search, $strOffSet ) );
+	$guests = $results->fetch();
 }
 ?>
 
@@ -474,9 +478,12 @@ Direct booking </label>
 </form>
 </body>
 </html>
+<?php
 
+/*
 <!--"Select reservation_id,reserved_through,guestid,reservation_by,reservation_by_phone,datereserved,
 reserve_checkindate,reserve_checkoutdate,no_adults,no_child0_5,no_child6_12,no_babies,meal_plan,
 billing_instructions,deposit,agents_ac_no,voucher_no,reserved_by,date_reserved,confirmed_by,
 confirmed_date,roomid
 From reservation";-->
+*/

@@ -22,13 +22,12 @@ For any details please feel free to contact me at taifa@users.sourceforge.net
 Or for snail mail. P. O. Box 938, Kilifi-80108, East Africa-Kenya.
 /*****************************************************************************/
 error_reporting(E_ALL & ~E_NOTICE);
-include_once("login_check.inc.php");
 include_once ("queryfunctions.php");
+include_once("login_check.inc.php");
 include_once ("functions.php");
 access("reports"); //check if user is allowed to access this page
 
 if (isset($_POST['Submit'])){
-	$conn=db_connect(HOST,USER,PASS,DB,PORT);
 	$action=$_POST['Submit'];
 	switch ($action) {
 		case 'Add Rooms Detail':
@@ -39,11 +38,13 @@ if (isset($_POST['Submit'])){
 		case 'Find':
 			//check if user is searching using name, payrollno, national id number or other fields
 			$search=$_POST["search"];
-			$sql="Select rooms.roomid,rooms.roomno,rooms.roomtypeid,roomtype.roomtype,rooms.roomname,
-			rooms.noofrooms,rooms.occupancy,rooms.tv,rooms.aircondition,rooms.fun,rooms.safe,rooms.fridge,rooms.reserverd,rooms.photo
-			From rooms Inner Join roomtype ON rooms.roomtypeid = roomtype.roomtypeid where roomno='$search'";
-			$results=mkr_query($sql,$conn);
-			$rooms=fetch_object($results);
+			$results = db_query( '
+				SELECT rooms.roomid, rooms.roomno, rooms.roomtypeid, roomtype.roomtype, rooms.roomname,
+					rooms.noofrooms, rooms.occupancy, rooms.tv, rooms.aircondition, rooms.fun, rooms.safe, rooms.fridge, rooms.reserverd, rooms.photo
+				FROM rooms
+				INNER JOIN roomtype ON rooms.roomtypeid = roomtype.roomtypeid
+				WHERE roomno = ?', array( $search ) );
+			$rooms = $results->fetch();
 			break;
 	}
 }

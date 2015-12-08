@@ -22,12 +22,11 @@ For any details please feel free to contact me at taifa@users.sourceforge.net
 Or for snail mail. P. O. Box 938, Kilifi-80108, East Africa-Kenya.
 /*****************************************************************************/
 error_reporting(E_ALL & ~E_NOTICE);
-include_once("login_check.inc.php");
 include_once ("queryfunctions.php");
+include_once("login_check.inc.php");
 include_once ("functions.php");
 
 if (isset($_POST['Submit'])){
-	$conn=db_connect(HOST,USER,PASS,DB,PORT);
 	$action=$_POST['Submit'];
 	switch ($action) {
 		case 'List':
@@ -37,13 +36,14 @@ if (isset($_POST['Submit'])){
 		case 'Find':
 			//check if user is searching using name, payrollno, national id number or other fields
 			$search=$_POST["search"];
-			$sql="Select guests.guestid,guests.lastname,guests.firstname,guests.middlename,guests.pp_no,
-			guests.idno,guests.countrycode,guests.pobox,guests.town,guests.postal_code,guests.phone,
-			guests.email,guests.mobilephone,countries.country
-			From guests
-			Inner Join countries ON guests.countrycode = countries.countrycode where pp_no='$search'";
-			$results=mkr_query($sql,$conn);
-			$agent=fetch_object($results);
+			$results = db_query( '
+				SELECT guests.guestid, guests.lastname, guests.firstname, guests.middlename, guests.pp_no,
+					guests.idno, guests.countrycode, guests.pobox, guests.town, guests.postal_code, guests.phone,
+					guests.email, guests.mobilephone, countries.country
+				FROM guests
+				INNER JOIN countries ON guests.countrycode = countries.countrycode
+				WHERE pp_no = ?', array( $search ) );
+			$agent = $results->fetch();
 			break;
 	}
 

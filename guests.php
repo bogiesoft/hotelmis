@@ -22,10 +22,9 @@ For any details please feel free to contact me at taifa@users.sourceforge.net
 Or for snail mail. P. O. Box 938, Kilifi-80108, East Africa-Kenya.
 /*****************************************************************************/
 error_reporting(E_ALL & ~E_NOTICE);
-include_once("login_check.inc.php");
 include_once ("queryfunctions.php");
+include_once("login_check.inc.php");
 include_once ("functions.php");
-$conn=db_connect(HOST,USER,PASS,DB,PORT);
 access("guest"); //check if user is allowed to access this page
 if (isset($_GET["search"])){
 	find($_GET["search"]);
@@ -34,9 +33,8 @@ if (isset($_GET["search"])){
 //consider having this as a function in the functions.php
 if (isset($_POST['Navigate'])){
 	//echo $_SESSION["strOffSet"];
-	$nRecords=num_rows(mkr_query("select * from guests",$conn),$conn);
+	$nRecords = db_query( 'SELECT * FROM guests' )->rowCount();
 	paginate($nRecords);
-	free_result($results);
 	find($_SESSION["strOffSet"]);	
 }
 
@@ -73,12 +71,13 @@ if (isset($_POST['Submit'])){
 				$email=$_POST["email"];
 				$mobilephone=$_POST["mobilephone"];
 				
-				$sql="INSERT INTO guests (lastname,firstname,middlename,pp_no,idno,countrycode,pobox,town,postal_code,phone,email,mobilephone)
-		 				VALUES('$lastname','$firstname','$middlename',$pp_no,$idno,'$countrycode','$pobox','$town','$postal_code','$phone','$email','$mobilephone')";
-				$results=mkr_query($sql,$conn);		
-				if ((int) $results==0){
+				$results = db_query( '
+					INSERT INTO guests (lastname, firstname, middlename, pp_no, idno, countrycode, pobox, town, postal_code, phone,email, mobilephone)
+		 			VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+		 			array( $lastname, $firstname, $middlename, $pp_no, $idno, $countrycode, $pobox, $town, $postal_code, $phone, $email, $mobilephone) );
+				if ( ! $results || $results->rowCount() == 0 ) {
 					//should log mysql errors to a file instead of displaying them to the user
-					echo 'Invalid query: ' . mysql_errno($conn). "<br>" . ": " . mysql_error($conn). "<br>";
+					echo 'Invalid query: ' . db_errno(). "<br>" . ": " . db_error(). "<br>";
 					echo "Guests record NOT ADDED.";  //return;
 				}else{
 					echo "<div align=\"center\"><h1>Guests record successful added.</h1></div>";
@@ -96,18 +95,18 @@ if (isset($_POST['Submit'])){
 }
 
 function find($search){
-	global $conn,$guests;
-	$search=$search;
+	global $guests;
 	$strOffSet=!empty($_POST["strOffSet"]) ? $_POST["strOffSet"] : 0;
 	//check on wether search is being done on idno/ppno/guestid/guestname
-	$sql="Select guests.guestid,concat_ws(' ',guests.firstname,guests.middlename,guests.lastname) as guest,guests.pp_no,
-		guests.idno,guests.countrycode,guests.pobox,guests.town,guests.postal_code,guests.phone,
-		guests.email,guests.mobilephone,countries.country
-		From guests
-		Inner Join countries ON guests.countrycode = countries.countrycode where guests.guestid='$search'
-		LIMIT $strOffSet,1";
-	$results=mkr_query($sql,$conn);
-	$guests=fetch_object($results);
+	$results = db_query( '
+		SELECT guests.guestid, CONCAT_WS(" ", guests.firstname, guests.middlename, guests.lastname) AS guest, guests.pp_no,
+			guests.idno, guests.countrycode, guests.pobox, guests.town, guests.postal_code, guests.phone,
+			guests.email, guests.mobilephone, countries.country
+		FROM guests
+		INNER JOIN countries ON guests.countrycode = countries.countrycode
+		WHERE guests.guestid = ?
+		LIMIT ?, 1', array( $search, $strOffSet ) );
+	$guests = $results->fetch();
 }
 ?>
 

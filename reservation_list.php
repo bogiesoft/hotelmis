@@ -22,10 +22,9 @@ For any details please feel free to contact me at taifa@users.sourceforge.net
 Or for snail mail. P. O. Box 938, Kilifi-80108, East Africa-Kenya.
 /*****************************************************************************/
 error_reporting(E_ALL & ~E_NOTICE);
-include_once("login_check.inc.php");
 include_once ("queryfunctions.php");
+include_once("login_check.inc.php");
 include_once ("functions.php");
-$conn=db_connect(HOST,USER,PASS,DB,PORT);
 
 if (isset($_GET['action'])){
 	$action=$_GET['action'];
@@ -34,18 +33,19 @@ if (isset($_GET['action'])){
 		case 'remove':
 			//before deleting check if deposit had been made and mark for refund - todo
 			//release reserved room - todo
-			$sql="delete from reservation where reservation_id='$search'";
-			$results=mkr_query($sql,$conn);
+			$results = db_query( 'DELETE FROM reservation WHERE reservation_id = ?', array( $search ) );
 			$msg[0]="Sorry reservation not deleted";
 			$msg[1]="Reservation successful deleted";
-			AddSuccess($results,$conn,$msg);
+			AddSuccess( $results, $msg );
 			break;
 		case 'Find':
 			//check if user is searching using name, payrollno, national id number or other fields
 			$search=$_POST["search"];
-			$sql="Select agentname,agents_ac_no,contact_person,telephone,fax,email,billing_address,town,postal_code,road_street,building From agents where agentcode='$search'";
-			$results=mkr_query($sql,$conn);
-			$agent=fetch_object($results);
+			$results = db_query( '
+				SELECT agentname, agents_ac_no, contact_person, telephone, fax, email, billing_address, town, postal_code, road_street, building
+				FROM agents
+				WHERE agentcode = ?', array( $search ) );
+			$agent = $results->fetch();
 			break;
 	}
 
@@ -152,14 +152,13 @@ function loadHTMLPost(URL, destination){
       <tr>
         <td><div id="Requests">
 		<?php
-			$sql="Select reservation.reservation_id,guests.guestid,concat_ws(' ',guests.firstname,guests.middlename,guests.lastname) as guest,reservation.reserve_checkindate,reservation.reserve_checkoutdate,DATEDIFF(reservation.reserve_checkoutdate,reservation.reserve_checkindate) nights,
-			reservation.meal_plan,reservation.no_adults,reservation.no_child0_5,reservation.roomid,reservation.reservation_by,rooms.roomno
-			From reservation
-			Inner Join guests ON reservation.guestid = guests.guestid
-			Inner Join rooms ON reservation.roomid = rooms.roomid";
-			$conn=db_connect(HOST,USER,PASS,DB,PORT);
-			$results=mkr_query($sql,$conn);
-			
+			$results = db_query( '
+				SELECT reservation.reservation_id, guests.guestid, CONCAT_WS(" ", guests.firstname, guests.middlename, guests.lastname) AS guest,
+				reservation.reserve_checkindate, reservation.reserve_checkoutdate, DATEDIFF(reservation.reserve_checkoutdate, reservation.reserve_checkindate) AS nights,
+				reservation.meal_plan, reservation.no_adults, reservation.no_child0_5, reservation.roomid, reservation.reservation_by, rooms.roomno
+				FROM reservation
+				INNER JOIN guests ON reservation.guestid = guests.guestid
+				INNER JOIN rooms ON reservation.roomid = rooms.roomid' );
 			echo "<table align=\"center\">";
 			//get field names to create the column header
 			echo "<tr bgcolor=\"#009999\">
@@ -175,7 +174,7 @@ function loadHTMLPost(URL, destination){
 				</tr>";
 				//end of field header
 				//get data from selected table on the selected fields
-			while ($reservation = fetch_object($results)) {
+			while ( $reservation = $results->fetch() ) {
 			//alternate row colour
 				$j++;
 				if($j%2==1){

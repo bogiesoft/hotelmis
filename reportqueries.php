@@ -24,7 +24,6 @@ Or for snail mail. P. O. Box 938, Kilifi-80108, East Africa-Kenya.
 error_reporting(E_ALL & ~E_NOTICE);
 include_once ("queryfunctions.php");
 include_once ("functions.php");
-$conn=db_connect(HOST,USER,PASS,DB,PORT);
 
 //bookedguests();
 $gueststatus = $_POST["button"];
@@ -108,8 +107,7 @@ switch ($gueststatus){
 
 function guestslist($sql){
 	//global $gueststatus;
-	$conn=db_connect(HOST,USER,PASS,DB,PORT);
-	$results=mkr_query($sql,$conn);
+	$results = db_query( $sql );
 	echo "<table align=\"center\">";
 	//get field names to create the column header
 	echo "<tr bgcolor=\"#009999\">
@@ -124,7 +122,7 @@ function guestslist($sql){
 		</tr>";
 	//end of field header
 	//get data from selected table on the selected fields
-	while ($guest = fetch_object($results)) {
+	while ( $guest = $results->fetch() ) {
 		//alternate row colour
 		$j++;
 		if($j%2==1){
@@ -149,8 +147,8 @@ function guestslist($sql){
 }
 
 function getdata(){
-	global $sql,$conn;
-	$results=mkr_query($sql,$conn);
+	global $sql;
+	$results = db_query( $sql );
 	/*$totRows = mysql_query("SELECT FOUND_ROWS()"); //get total number of records in the select query irrespective of the LIMIT clause
 	$totRows = mysql_result($totRows , 0);
 	$_SESSION["nRecords"]=$totRows;	
@@ -160,17 +158,17 @@ function getdata(){
 	//get field names to create the column header
 	echo "<tr bgcolor=\"#009999\">
 		<th>Action</th>";
-		while ($i < mysql_num_fields($results)) {
-				$meta = mysql_fetch_field($results, $i);
+		while ( $i < $results->columnCount() ) {
+				$meta = $results->fetchColumn( $i );
 				$field=$meta->name;
 				echo "<th>" . $field . "</th>";
 				$i++;
 			}		
 		"</tr>";
 	//end of field header
-	if  ((int)$results!==0){
+	if  ( $results && $results->rowCount() !== 0 ){
 	//get data from selected table on the selected fields
-	while ($row = fetch_object($results)) {
+	while ( $row = $results->fetch() ) {
 		//alternate row colour
 		$j++;
 		if($j%2==1){
@@ -180,8 +178,8 @@ function getdata(){
 		}
 			echo "<td><a href=\"reportqueries.php?search=$row->ID\"><img src=\"images/button_view.png\" width=\"16\" height=\"16\" border=\"0\" title=\"view\"/></a></td>";
 			$i = 0;
-			while ($i < mysql_num_fields($results)) {
-				$meta = mysql_fetch_field($results, $i);
+			while ( $i < $results->columnCount() ) {
+				$meta = $results->fetchColumn( $i );
 				$field=$meta->name;
 				echo "<td>" . $row->$field . "</td>";
 				$i++;
@@ -191,8 +189,9 @@ function getdata(){
 	} //end of while row
 	echo "</table>";
 	}
-	free_result($results);
+	$results->closeCursor();
 }
+/*
 "Select
 rooms.roomno,
 guests.lastname,
@@ -210,4 +209,4 @@ year(booking.checkin_date ) = '2006' AND
 month(booking.checkin_date ) = '1'
 Order By
 booking.checkin_date Asc";
-?>
+*/

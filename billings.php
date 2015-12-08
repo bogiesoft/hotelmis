@@ -22,11 +22,10 @@ For any details please feel free to contact me at taifa@users.sourceforge.net
 Or for snail mail. P. O. Box 938, Kilifi-80108, East Africa-Kenya.
 /*****************************************************************************/
 error_reporting(E_ALL & ~E_NOTICE);
-include_once("login_check.inc.php");
 include_once ("queryfunctions.php");
+include_once("login_check.inc.php");
 include_once ("functions.php");
 access("billing"); //check if user is allowed to access this page
-$conn=db_connect(HOST,USER,PASS,DB,PORT);
 
 /*if (isset($_GET["search"])){
 	$search=$_GET["search"];
@@ -39,11 +38,10 @@ if (isset($_GET['action'])){
 	switch ($action) {
 		case 'remove':
 			//before deleting make sure bill has not been printed - todo
-			$sql="delete from transactions where transno='$search'";
-			$results=mkr_query($sql,$conn);
+			$results = db_query( 'DELETE FROM transactions WHERE transno = ?', array( $search ) );
 			$msg[0]="Sorry item not deleted";
 			$msg[1]="Item successful deleted";
-			AddSuccess($results,$conn,$msg);
+			AddSuccess( $results, $msg );
 			//go to original billno - get value from hidden field
 			find($billno);
 			$search=$billno;
@@ -56,7 +54,6 @@ if (isset($_GET['action'])){
 }
 
 if (isset($_POST['Submit'])){
-	$conn=db_connect(HOST,USER,PASS,DB,PORT);
 	$action=$_POST['Submit'];
 	switch ($action) {
 		case 'Update':
@@ -81,12 +78,13 @@ if (isset($_POST['Submit'])){
 				$details=$_POST["details"];			
 				$dr= !empty($_POST["dr"]) ? $_POST["dr"] : 'NULL';				
 				$cr= !empty($_POST["cr"]) ? $_POST["cr"] : 'NULL';								
-				$sql="INSERT INTO transactions (billno,doc_type,doc_no,doc_date,details,dr,cr)
-				 VALUES($billno,'$doc_type',$doc_no,'$doc_date',$details,$dr,$cr)";
-				$results=mkr_query($sql,$conn);		
+				$results = db_query( '
+					INSERT INTO transactions (billno, doc_type, doc_no, doc_date, details, dr, cr)
+					VALUES(?, ?, ?, ?, ?, ?, ?)',
+					array( $billno, $doc_type, $doc_no, $doc_date, $details, $dr, $cr ) );
 				$msg[0]="Sorry item not posted";
 				$msg[1]="Item successful posted";
-				AddSuccess($results,$conn,$msg);
+				AddSuccess( $results, $msg );
 				find($billno); //go back to bill after updating it
 				$search=$billno;
 			}
@@ -98,18 +96,16 @@ if (isset($_POST['Submit'])){
 			$userid=$_SESSION["userid"];
 
 			//change room status to vacant
-			$sql="Update rooms set status='V' where roomno=$roomno";
-			$results=mkr_query($sql,$conn);		
+			$results = db_query( 'UPDATE rooms SET status = ? WHERE roomno = ?', array( 'V', $roomno ) );
 			$msg[0]="Sorry room not marked as vacant";
 			$msg[1]="Room <b>$roomno</b> marked as vacant";
-			AddSuccess($results,$conn,$msg);
+			AddSuccess( $results, $msg );
 			
 			//Update booking status and update checkout date - to add checkoutby,codatetime in booking
-			$sql="Update booking set checkoutby=$userid,codatetime=now() where book_id=$book_id";
-			$results=mkr_query($sql,$conn);		
+			$results = db_query( 'UPDATE booking SET checkoutby = ?, codatetime = NOW() WHERE book_id = ?', array( $userid, $book_id ) );
 			$msg[0]="Sorry checkout details not updated.";
 			$msg[1]="Checkout date and time updated.";
-			AddSuccess($results,$conn,$msg);
+			AddSuccess( $results, $msg );
 
 			//print bill
 			
@@ -123,18 +119,9 @@ if (isset($_POST['Submit'])){
 }
 
 function find($search){
-	global $conn,$bill;
-	$search=$search;
+	global $bill;
 	//search on booking
 	//check on wether search is being done on idno/ppno/guestid/guestname
-	$sql="Select bills.bill_id,bills.book_id,bills.date_billed,bills.billno,bills.`status`,bills.date_checked,
-		concat_ws(' ',guests.firstname,guests.middlename,guests.lastname) as guest,guests.pobox,guests.town,guests.postal_code,
-		booking.checkin_date,booking.checkout_date,booking.roomid,rooms.roomno
-		From bills
-		Inner Join booking ON bills.book_id = booking.book_id
-		Inner Join guests ON booking.guestid = guests.guestid
-		Inner Join rooms ON booking.roomid = rooms.roomid where bills.bill_id='$search'";
-		
 		//need a search on reservation - todo not (tested)
 		/*$sql="Select bills.bill_id,bills.book_id,bills.date_billed,bills.billno,bills.`status`,bills.date_checked,
 		concat_ws(' ',guests.firstname,guests.middlename,guests.lastname) as guest,guests.pobox,guests.town,guests.postal_code,
@@ -143,8 +130,16 @@ function find($search){
 		Inner Join reservation ON bills.book_id = reservation.reservation_id
 		Inner Join guests ON reservation.guestid = guests.guestid
 		Inner Join rooms ON reservation.roomid = rooms.roomid where bills.bill_id='$search'";*/
-	$results=mkr_query($sql,$conn);
-	$bill=fetch_object($results);
+	$results = db_query( '
+		SELECT bills.bill_id, bills.book_id, bills.date_billed, bills.billno, bills.status, bills.date_checked,
+		CONCAT_WS(" ", guests.firstname, guests.middlename, guests.lastname) AS guest, guests.pobox, guests.town, guests.postal_code,
+		booking.checkin_date, booking.checkout_date, booking.roomid, rooms.roomno
+		FROM bills
+		INNER JOIN booking ON bills.book_id = booking.book_id
+		INNER JOIN guests ON booking.guestid = guests.guestid
+		INNER JOIN rooms ON booking.roomid = rooms.roomid
+		WHERE bills.bill_id = ?', array( $search ) );
+	$bill = $results->fetch();
 }
 ?>
 
@@ -310,12 +305,12 @@ This notice must stay intact for use
 			  <?php
 				$billno=!empty($_POST['search']) ? $_POST['search'] : 0;
 				//$billno=!empty($_POST['billid']) ? $_POST['billid'] : 1;
-				$sql="Select transactions.transno,transactions.doc_date,details.item,transactions.dr,transactions.cr,transactions.doc_no,transactions.doc_type,details.itemid,transactions.billno
-					From transactions
-					Inner Join details ON transactions.details = details.itemid
-					Where transactions.billno = '$search'";
-				$results=mkr_query($sql,$conn);
-			
+				$results = db_query( '
+					SELECT transactions.transno, transactions.doc_date, details.item, transactions.dr, transactions.cr, transactions.doc_no, transactions.doc_type,
+						details.itemid, transactions.billno
+					FROM transactions
+					INNER JOIN details ON transactions.details = details.itemid
+					WHERE transactions.billno = ?', array( $search ) );
 			  	echo "<table width=\"100%\"  border=\"0\" cellpadding=\"1\">
                   <tr bgcolor=\"#FF9900\">
                     <th></th>
@@ -328,7 +323,7 @@ This notice must stay intact for use
                     <th>Doc. Type</th>					
                   </tr>";
 				//get data from selected table on the selected fields
-				while ($trans = fetch_object($results)) {
+				while ( $trans = $results->fetch() ) {
 					$balance=$balance-$trans->cr+$trans->dr;
 					//alternate row colour
 					$j++;

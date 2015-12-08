@@ -22,10 +22,9 @@ For any details please feel free to contact me at taifa@users.sourceforge.net
 Or for snail mail. P. O. Box 938, Kilifi-80108, East Africa-Kenya.
 /*****************************************************************************/
 error_reporting(E_ALL & ~E_NOTICE);
-include_once("login_check.inc.php");
 include_once ("queryfunctions.php");
+include_once("login_check.inc.php");
 include_once ("functions.php");
-$conn=db_connect(HOST,USER,PASS,DB,PORT);
 
 if (isset($_GET['action'])){
 	$action=$_GET['action'];
@@ -33,11 +32,10 @@ if (isset($_GET['action'])){
 	switch ($action) {
 		case 'remove':
 			//before deleting make sure user does not have any transactions - todo
-			$sql="delete from users where userid='$search'";
-			$results=mkr_query($sql,$conn);
+			$results = db_query( 'DELETE FROM users WHERE userid = ?', array( $search ) );
 			$msg[0]="Sorry user not deleted";
 			$msg[1]="User successful deleted";
-			AddSuccess($results,$conn,$msg);
+			AddSuccess( $results, $msg );
 			break;
 		case 'List':
 
@@ -46,13 +44,14 @@ if (isset($_GET['action'])){
 		case 'Find':
 			//check if user is searching using name, payrollno, national id number or other fields
 			$search=$_POST["search"];
-			$sql="Select guests.guestid,guests.lastname,guests.firstname,guests.middlename,guests.pp_no,
-			guests.idno,guests.countrycode,guests.pobox,guests.town,guests.postal_code,guests.phone,
-			guests.email,guests.mobilephone,countries.country
-			From guests
-			Inner Join countries ON guests.countrycode = countries.countrycode where pp_no='$search'";
-			$results=mkr_query($sql,$conn);
-			$agent=fetch_object($results);
+			$results = db_query( '
+				SELECT guests.guestid, guests.lastname, guests.firstname, guests.middlename, guests.pp_no,
+					guests.idno, guests.countrycode, guests.pobox, guests.town, guests.postal_code, guests.phone,
+					guests.email, guests.mobilephone, countries.country
+				FROM guests
+				INNER JOIN countries ON guests.countrycode = countries.countrycode
+				WHERE pp_no = ?', array( $search ) );
+			$agent = $results->fetch();
 			break;
 	}
 }
@@ -167,13 +166,12 @@ function loadHTMLPost(URL, destination){
       <tr>
         <td colspan="2"><div id="Requests">
 		<?php
-			$conn=db_connect(HOST,USER,PASS,DB,PORT);
-			$sql="Select users.userid,concat_ws(' ',users.fname,users.sname) as user,users.loginname,users.phone,users.mobile,
-				users.fax,users.email,users.dateregistered,users.admin,users.guest,users.reservation,
-				users.booking,users.agents,users.rooms,users.billing,users.rates,users.lookup,users.reports,countries.country
-				From users
-				left Join countries ON users.countrycode = countries.countrycode";
-			$results=mkr_query($sql,$conn);
+			$results = db_query( '
+				SELECT users.userid, CONCAT_WS(" ", users.fname, users.sname) AS user, users.loginname, users.phone, users.mobile,
+					users.fax, users.email, users.dateregistered, users.admin, users.guest, users.reservation,
+					users.booking, users.agents, users.rooms, users.billing, users.rates, users.lookup, users.reports, countries.country
+				FROM users
+				LEFT JOIN countries ON users.countrycode = countries.countrycode' );
 			echo "<table align=\"center\">";
 			//get field names to create the column header
 			echo "<tr bgcolor=\"#009999\">
@@ -193,7 +191,7 @@ function loadHTMLPost(URL, destination){
 				</tr>";
 			//end of field header
 			//get data from selected table on the selected fields
-			while ($user = fetch_object($results)) {
+			while ( $user = $results->fetch() ) {
 				//alternate row colour
 				$j++;
 				if($j%2==1){
