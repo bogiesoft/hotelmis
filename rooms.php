@@ -22,8 +22,8 @@ For any details please feel free to contact me at taifa@users.sourceforge.net
 Or for snail mail. P. O. Box 938, Kilifi-80108, East Africa-Kenya.
 /*****************************************************************************/
 error_reporting(E_ALL & ~E_NOTICE);
-include_once("login_check.inc.php");
 include_once ("queryfunctions.php");
+include_once("login_check.inc.php");
 include_once ("functions.php");
 access("rooms"); //check if user is allowed to access this page
 
@@ -72,7 +72,9 @@ if (isset($_POST['Submit'])){
 					INSERT INTO rooms (roomno, roomtypeid, roomname, noofrooms, occupancy, tv, aircondition, fun, safe, fridge, status, photo, filetype)
 					VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
 					array( $roomno, $roomtypeid, $roomname, $noofrooms, $occupancy, $tv, $aircondition, $fun, $safe, $fridge, $status, $photo, $filetype ) );
-				AddSuccess( $results );
+				$msg[0]="";
+				$msg[1]="";
+				AddSuccess( $results, $msg );
 			}
 			break;
 		case 'List':

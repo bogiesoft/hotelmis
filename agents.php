@@ -22,8 +22,8 @@ For any details please feel free to contact me at taifa@users.sourceforge.net
 Or for snail mail. P. O. Box 938, Kilifi-80108, East Africa-Kenya.
 /*****************************************************************************/
 error_reporting(E_ALL & ~E_NOTICE);
-include_once("login_check.inc.php");
 include_once ("queryfunctions.php");
+include_once("login_check.inc.php");
 include_once ("functions.php");
 access("agents"); //check if user is allowed to access this page
 

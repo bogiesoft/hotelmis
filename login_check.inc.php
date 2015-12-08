@@ -101,4 +101,3 @@ function access($page){
 	}
 	if ($access==0) exit("If you were brough over here it's because you do not have permission to view this page.");//header("Location: index.php");
 }
-?>

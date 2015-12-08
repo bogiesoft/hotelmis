@@ -20,8 +20,8 @@ Or for snail mail. P. O. Box 938, Kilifi-80108, East Africa-Kenya.
 */
 session_start();
 error_reporting(E_ALL & ~E_NOTICE);
-include_once("login_check.inc.php");
 include_once ("queryfunctions.php");
+include_once("login_check.inc.php");
 include_once ("functions.php");
 access("admin"); //check if user is allowed to access this page
 
