@@ -23,15 +23,13 @@ Or for snail mail. P. O. Box 938, Kilifi-80108, East Africa-Kenya.
 /*****************************************************************************/
 error_reporting(E_ALL & ~E_NOTICE);
 function populate_select($table,$fields_id,$fields_value,$selected){
-	$conn=db_connect(HOST,USER,PASS,DB,PORT);
-	$sql="Select $fields_id,$fields_value From $table Order By $fields_value";
-	$results=mkr_query($sql,$conn);
-	while ($row = fetch_object($results)){
+	$results = db_query( 'SELECT ' . preg_replace( '/[^\w\d_]+/', '', $fields_id ) . ', ' . preg_replace( '/[^\w\d_]+/', '', $fields_value ) . ' FROM ' . preg_replace( '/[^\w\d_]+/', '', $table ) . ' ORDER BY ' . preg_replace( '/[^\w\d_]+/', '', $fields_value ) );
+	while ( $row = $results->fetch() ) {
 		$SelectedCountry=($row->$fields_id==$selected) ? " selected" : "";		
 		echo "<option value=" . $row->$fields_id . $SelectedCountry . ">" . $row->$fields_value . "</option>";
 		//($row->$fields_id==$selected) ? 'selected' : '';
 	}
-	free_result($results);
+	$results->closeCursor();
 }
 
 function signon(){
@@ -43,16 +41,11 @@ function signon(){
 }
 
 function delete_copy() {
-	/* makes connection */
-	$conn=db_connect(HOST,USER,PASS,DB,PORT);
 	/* Creates SQL statement to retrieve the copies using the releaseID */
-	$sql = "DELETE FROM $file WHERE $recordid =" . $_POST['ID'];
-	$results=mkr_query($sql,$conn);
+	$results = db_query( 'DELETE FROM ' . preg_replace( '/[^\w\d_]+/', '', $file ) . ' WHERE $recordid = ?', array( $_POST['ID'] ) );
 	$msg[0]="Sorry ERROR in deletion";
 	$msg[1]="Record successful DELETED";			
-	AddSuccess($results,$conn,$msg);
-	/* Closes connection */
-	mysql_close ($conn);
+	AddSuccess( $results, $msg );
 	/* calls get_data */
 	//get_data();
 } 
@@ -131,26 +124,26 @@ class formValidator{
 
 //todo - customize
 function findguest($search){
-	global $conn,$guests;
+	global $guests;
 	$search=$search;
 	//check on wether search is being done on idno/ppno/guestid/guestname
-	$sql="Select guests.guestid,guests.lastname,guests.firstname,guests.middlename,guests.pp_no,
-		guests.idno,guests.countrycode,guests.pobox,guests.town,guests.postal_code,guests.phone,
-		guests.email,guests.mobilephone,countries.country
-		From guests
-		Inner Join countries ON guests.countrycode = countries.countrycode where guests.guestid='$search'";
-	$results=mkr_query($sql,$conn);
-	$guests=fetch_object($results);
+	$results = db_query( '
+		SELECT guests.guestid, guests.lastname, guests.firstname, guests.middlename, guests.pp_no,
+			guests.idno, guests.countrycode, guests.pobox, guests.town, guests.postal_code, guests.phone,
+			guests.email, guests.mobilephone, countries.country
+		FROM guests
+		INNER JOIN countries ON guests.countrycode = countries.countrycode
+		WHERE guests.guestid = ?', array( $search ) );
+	$guests = $results->fetch();
 }
 
-function AddSuccess($results,&$conn,$msg){
-	if ((int) $results==0){
+function AddSuccess( $results, $msg ) {
+	if ( ! $results || $results->rowCount() == 0 ) {
 		//should log mysql errors to a file instead of displaying them to the user
-		echo 'Invalid query: ' . mysql_errno($conn). "<br>" . ": " . mysql_error($conn). "<br>";
-		echo "<div align=\"center\"><h1>$msg[0]</h1></div>";		
-	}else{
+		echo 'Invalid query: ' . db_errno() . "<br>" . ": " . db_error() . "<br>";
+		echo "<div align=\"center\"><h1>$msg[0]</h1></div>";
+	} else {
 		echo "<div align=\"center\"><h1>$msg[1]</h1></div>";
-		//return(AddSuccess);
 	}
 }
 

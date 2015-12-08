@@ -51,42 +51,28 @@ function Login(){
 	$password=$_POST['password'];
 	
 	if($username && $password) {
-	  $conn=mysql_connect(HOST,USER,PASS) or die ("Whoops");    // Connect to the database, or if connection fails print error message.
 	  $password = md5($password);          // encode submited password with MD5 encryption and store it back in the same variable. If not on a windows box, I suggest you use crypt()
-	  $sql = "select * from users where loginname='$username'";   // query statment that gets the username/password from 'login' where the username is the same as the one you submited
-	  $r = mysql_db_query(DB,$sql);  // Execute Query
+	  $r = db_query( 'SELECT * FROM users WHERE loginname = ?', array( $username ) );  // Execute Query
 	  
 	  // if no rows for that database come up, redirect.
-	  if(!mysql_num_rows($r)){
-			mysql_close($conn);
+	  if( ! $r->rowCount() ){
 			header("Location: index.php");  // This is the redirection, notice it uses $SCRIPT_NAME which is a predefined variable with the name of the script in it.
-		}else{
-			$passed=@mysql_connect(HOST,USER,PASS);
 		}
 		
-		mysql_select_db(DB);
-		if (!$passed) {
-			//echo 'Could not connect: ' . mysql_error();
-			echo "<center><font color=\"#FF0000\"><b>Invalid User Name or Password</b></font></center>";     
-			$_SESSION["logged"]=0;
-			$_SESSION["userid"]="";
-		}else{
-			//$sql="select pass('$password') as pass, fname, sname from users";
-			$sql="select pass, fname, sname, loginname, userid from users where loginname='$username'";
-			$password=mkr_query($sql,$passed);
-			$password=mysql_fetch_array($password);
-			$_SESSION["employee"]=$password['fname'] ." ". $password['sname'];
-			$_SESSION["loginname"]=$password['loginname'];
-			$_SESSION["userid"]=$password['userid'];
-			$password=$password['pass'];		
-			//******************************************************************
-			//*Not the best option but produce the required results - unencrypted password saved to a cookie
-			//******************************************************************
-			setcookie("data_login","$username $password",time()+60*30);  // Set the cookie named 'candle_login' with the value of the username (in plain text) and the password (which has been encrypted and serialized.)
-			$_SESSION["logged"]=1;
-			// set variable $msg with an HTML statement that basically says redirect to the next page. The reason we didn't use header() is that using setcookie() and header() at the sametime isn't 100% compatible with all browsers, this is more compatible.
-			$msg = "<meta http-equiv=\"Refresh\" content=\"0;url=./index.php\">"; //put index.php
-		}
+		//$sql="select pass('$password') as pass, fname, sname from users";
+		$password = db_query( 'SELECT pass, fname, sname, loginname, userid FROM users WHERE loginname = ?', array( $username) );
+		$password = $password->fetch( PDO::FETCH_ASSOC );
+		$_SESSION["employee"]=$password['fname'] ." ". $password['sname'];
+		$_SESSION["loginname"]=$password['loginname'];
+		$_SESSION["userid"]=$password['userid'];
+		$password=$password['pass'];		
+		//******************************************************************
+		//*Not the best option but produce the required results - unencrypted password saved to a cookie
+		//******************************************************************
+		setcookie("data_login","$username $password",time()+60*30);  // Set the cookie named 'candle_login' with the value of the username (in plain text) and the password (which has been encrypted and serialized.)
+		$_SESSION["logged"]=1;
+		// set variable $msg with an HTML statement that basically says redirect to the next page. The reason we didn't use header() is that using setcookie() and header() at the sametime isn't 100% compatible with all browsers, this is more compatible.
+		$msg = "<meta http-equiv=\"Refresh\" content=\"0;url=./index.php\">"; //put index.php
 	}else{
 		echo "<center><font color=\"#FF0000\"><b>Enter your UserName and Password to login on to the system</b></font></center>";
 		$_SESSION["logged"]=0;

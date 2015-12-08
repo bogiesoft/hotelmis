@@ -25,7 +25,6 @@ error_reporting(E_ALL & ~E_NOTICE);
 include_once("login_check.inc.php");
 include_once ("queryfunctions.php");
 include_once ("functions.php");
-$conn=db_connect(HOST,USER,PASS,DB,PORT);
 
 if (isset($_GET["search"])){
 	find($_GET["search"]);
@@ -64,15 +63,14 @@ if (isset($_POST['Submit'])){
 				$roomid=$_POST["roomid"];
 				$checkedin_by=1; //$_POST["checkedin_by"];
 				$invoice_no=!empty($_POST["invoice_no"]) ? $_POST["invoice_no"] : 'NULL';
-			
-				$sql="INSERT INTO booking (guestid,booking_type,meal_plan,no_adults,no_child,checkin_date,checkout_date,
-					residence_id,payment_mode,agents_ac_no,roomid,checkedin_by,invoice_no)
-				 VALUES($guestid,'$booking_type','$meal_plan',$no_adults,$no_child,$checkin_date,$checkout_date,
-					'$residence_id',$payment_mode,$agents_ac_no,$roomid,$checkedin_by,$invoice_no)";
-				$results=mkr_query($sql,$conn);
-				if ((int) $results==0){
+				$results = db_query( '
+					INSERT INTO booking (guestid, booking_type, meal_plan, no_adults, no_child, checkin_date, checkout_date,
+						residence_id, payment_mode, agents_ac_no, roomid, checkedin_by, invoice_no)
+					VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, $invoice_no)', array( $guestid, $booking_type, $meal_plan, $no_adults, $no_child, $checkin_date,
+						$checkout_date, $residence_id, $payment_mode, $agents_ac_no, $roomid, $checkedin_by, $invoice_no ) );
+				if ( ! $results || $results->rowCount() == 0 ) {
 					//should log mysql errors to a file instead of displaying them to the user
-					echo 'Invalid query: ' . mysql_errno($conn). "<br>" . ": " . mysql_error($conn). "<br>";
+					echo 'Invalid query: ' . db_errno(). "<br>" . ": " . db_error(). "<br>";
 					echo "Guests NOT BOOKED.";  //return;
 				}else{
 					echo "<div align=\"center\"><h1>Guests successful checked in.</h1></div>";
@@ -82,13 +80,13 @@ if (isset($_POST['Submit'])){
 			break;
 		case 'List':
 			$guestid=$_POST['guestid'];
-			$sql="Select guests.guestid,guests.lastname,guests.firstname,guests.middlename,booking.checkin_date,booking.checkout_date,
-			booking.meal_plan,booking.no_adults,booking.no_child,booking.roomid,booking.checkedin_by,rooms.roomno
-			From booking
-			Inner Join guests ON booking.guestid = guests.guestid
-			Inner Join rooms ON booking.roomid = rooms.roomid
-			Where booking.guestid = '$guestid'";
-			$results=mkr_query($sql,$conn);
+			$results = db_query( '
+				SELECT guests.guestid, guests.lastname, guests.firstname, guests.middlename, booking.checkin_date, booking.checkout_date,
+					booking.meal_plan, booking.no_adults, booking.no_child, booking.roomid, booking.checkedin_by, rooms.roomno
+				FROM booking
+				INNER JOIN guests ON booking.guestid = guests.guestid
+				INNER JOIN rooms ON booking.roomid = rooms.roomid
+				WHERE booking.guestid = ?', array( $guestid ) );
 			echo "<table align=\"center\">";
 			//get field names to create the column header
 			echo "<tr bgcolor=\"#009999\">
@@ -103,7 +101,7 @@ if (isset($_POST['Submit'])){
 				</tr>";
 			//end of field header
 			//get data from selected table on the selected fields
-			while ($booking = fetch_object($results)) {
+			while ( $booking = $results->fetch() ) {
 				//alternate row colour
 				$j++;
 				if($j%2==1){
@@ -127,28 +125,29 @@ if (isset($_POST['Submit'])){
 			//check if user is searching using name, payrollno, national id number or other fields
 			$search=$_POST["search"];
 			find($search);
-			$sql="Select guests.guestid,guests.lastname,guests.firstname,guests.middlename,guests.pp_no,
-			guests.idno,guests.countrycode,guests.pobox,guests.town,guests.postal_code,guests.phone,
-			guests.email,guests.mobilephone,countries.country
-			From guests
-			Inner Join countries ON guests.countrycode = countries.countrycode where pp_no='$search'";
-			$results=mkr_query($sql,$conn);
-			$bookings=fetch_object($results);
+			$results = db_query( '
+				SELECT guests.guestid, guests.lastname, guests.firstname, guests.middlename, guests.pp_no,
+					guests.idno, guests.countrycode, guests.pobox, guests.town, guests.postal_code, guests.phone,
+					guests.email, guests.mobilephone, countries.country
+				FROM guests
+				INNER JOIN countries ON guests.countrycode = countries.countrycode
+				WHERE pp_no = ?', array( $search ) );
+			$bookings = $results->fetch();
 			break;
 	}
 }
 
 function find($search){
-	global $conn,$guests;
-	$search=$search;
+	global $guests;
 	//check on wether search is being done on idno/ppno/guestid/guestname
-	$sql="Select guests.guestid,guests.lastname,guests.firstname,guests.middlename,guests.pp_no,
-		guests.idno,guests.countrycode,guests.pobox,guests.town,guests.postal_code,guests.phone,
-		guests.email,guests.mobilephone,countries.country
-		From guests
-		Inner Join countries ON guests.countrycode = countries.countrycode where guests.guestid='$search'";
-	$results=mkr_query($sql,$conn);
-	$guests=fetch_object($results);
+	$results = db_query( '
+		SELECT guests.guestid, guests.lastname, guests.firstname, guests.middlename, guests.pp_no,
+			guests.idno, guests.countrycode, guests.pobox, guests.town, guests.postal_code, guests.phone,
+			guests.email, guests.mobilephone, countries.country
+		FROM guests
+		INNER JOIN countries ON guests.countrycode = countries.countrycode
+		WHERE guests.guestid = ?', array( $search ) );
+	$guests = $results->fetch();
 }
 
 ?>
@@ -268,7 +267,6 @@ This notice must stay intact for use
 	Inner Join guests ON booking.guestid = guests.guestid
 	Order By booking.checkin_date Asc";
 	$results=mkr_query($sql,$conn);*/
-	$conn=db_connect(HOST,USER,PASS,DB,PORT);
 	echo "<table align=\"center\" border=\"1\">";
 	echo "<tr><td colspan=\"32\">Guest booking for the Month of January 2006</td></tr>
 	<tr><td width=\"67\"><select name=\"year\" id=\"year\" >
@@ -301,11 +299,13 @@ This notice must stay intact for use
 	echo "</tr>";
 	$month=$_POST["month"];
 	$year=$_POST["year"];
+	/* Commented out as unused.
 	$sqloriginal = "Select rooms.roomno,rooms.status,booking.guestid,guests.lastname,guests.firstname,guests.middlename,DAYOFMONTH(booking.checkin_date) chkin_day,
 	 		MONTH(booking.checkin_date) chkin_month, YEAR(booking.checkin_date) chkin_year,booking.checkin_date,booking.checkout_date, DATEDIFF(booking.checkout_date,booking.checkin_date) nights 
          From rooms left Join booking ON rooms.roomid = booking.roomid 
          left Join guests ON booking.guestid = guests.guestid 
          Order By rooms.roomno Asc";
+	// */
 	/*$sql = "Select rooms.roomno,booking.guestid,guests.lastname,guests.firstname,guests.middlename,DAYOFMONTH(booking.checkin_date) chkin_day,
 	 		MONTH(booking.checkin_date) chkin_month, YEAR(booking.checkin_date) chkin_year,booking.checkin_date,booking.checkout_date, DATEDIFF(booking.checkout_date,booking.checkin_date) nights
          From rooms left Join booking ON rooms.roomid = booking.roomid 
@@ -315,30 +315,29 @@ This notice must stay intact for use
 		 
 		 
 		 //Booking and reservation data on same row separate columns;
-	$sql = "Select	rooms.roomno,rooms.`status`,booking.guestid,
-		concat_ws(' ',guests.firstname,guests.middlename,guests.lastname) as b_guest,
-		DAYOFMONTH(booking.checkin_date) AS chkin_day,
-		MONTH(booking.checkin_date) AS chkin_month,
-		YEAR(booking.checkin_date) AS chkin_year,
-		booking.checkin_date,booking.checkout_date,
-		DATEDIFF(booking.checkout_date,booking.checkin_date) AS b_nights,
-		DAYOFMONTH(reservation.reserve_checkindate) AS r_chkin_day,
-		MONTH(reservation.reserve_checkindate) AS r_chkin_month,
-		YEAR(reservation.reserve_checkindate) AS r_chkin_year,
-		reservation.reserve_checkindate,reservation.reserve_checkoutdate,
-		DATEDIFF(reservation.reserve_checkoutdate,reservation.reserve_checkindate) AS r_nights,
-		reservation.billed,reservation.deposit,
-		concat_ws(' ',guests2.firstname,guests2.middlename,guests2.lastname) as r_guest
-		From rooms
-		Left Join booking ON rooms.roomid = booking.roomid
-		Left Join guests ON booking.guestid = guests.guestid
-		Left Join reservation ON rooms.roomid = reservation.roomid
-		Left Join guests as guests2 ON reservation.guestid = guests2.guestid
-		Order By rooms.roomno Asc";
-				 
-	$results=mkr_query($sql,$conn);
-	$numrows=num_rows($results);
-	while ($row=fetch_object($results)){
+	$results = db_query( '
+		SELECT rooms.roomno, rooms.status, booking.guestid,
+			CONCAT_WS(" ", guests.firstname, guests.middlename, guests.lastname) AS b_guest,
+			DAYOFMONTH(booking.checkin_date) AS chkin_day,
+			MONTH(booking.checkin_date) AS chkin_month,
+			YEAR(booking.checkin_date) AS chkin_year,
+			booking.checkin_date, booking.checkout_date,
+			DATEDIFF(booking.checkout_date, booking.checkin_date) AS b_nights,
+			DAYOFMONTH(reservation.reserve_checkindate) AS r_chkin_day,
+			MONTH(reservation.reserve_checkindate) AS r_chkin_month,
+			YEAR(reservation.reserve_checkindate) AS r_chkin_year,
+			reservation.reserve_checkindate, reservation.reserve_checkoutdate,
+			DATEDIFF(reservation.reserve_checkoutdate, reservation.reserve_checkindate) AS r_nights,
+			reservation.billed, reservation.deposit,
+			CONCAT_WS(" ", guests2.firstname, guests2.middlename, guests2.lastname) AS r_guest
+		FROM rooms
+		LEFT JOIN booking ON rooms.roomid = booking.roomid
+		LEFT JOIN guests ON booking.guestid = guests.guestid
+		LEFT JOIN reservation ON rooms.roomid = reservation.roomid
+		LEFT JOIN guests as guests2 ON reservation.guestid = guests2.guestid
+		ORDER BY rooms.roomno ASC' );
+	$numrows = $results->rowCount();
+	while ( $row = $results->fetch() ) {
 		echo "<tr><td>$row->roomno</td>";	
 		//get field names to create the column header
 		for($i=1; $i<=31; $i++){
@@ -384,7 +383,7 @@ This notice must stay intact for use
 		}
 		echo "</tr>";
 	}
-	free_result($result);
+	$results->closeCursor();
 	echo "</table>";
 	 ?> </div></td>
 		

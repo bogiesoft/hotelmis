@@ -27,12 +27,11 @@ include_once ("functions.php");
 
 $loginname=$_SESSION["loginname"];
 $sql = "select userid,admin,guest,reservation,booking,agents,rooms,billing,rates,lookup,reports from users where loginname='$loginname'";
-$conn=db_connect(HOST,USER,PASS,DB,PORT);
-$results=mkr_query($sql,$conn);
+$results = db_query( 'SELECT userid, admin, guest, reservation, booking, agents, rooms, billing, rates, lookup, reports FROM users WHERE loginname = ?', array( $loginname ) );
 $msg[0]="";
 $msg[1]="";
-AddSuccess($results,$conn,$msg);
-$access = fetch_object($results);
+AddSuccess( $results, $msg );
+$access = $results->fetch();
 
 //will be used to set access on pages
 /*if !isset($_SESSION["access"]){
@@ -49,5 +48,4 @@ if($access->billing==1) echo "<tr><td><a href=\"billings.php\">Guest Bill</a></t
 if($access->rates==1) echo "<tr><td><a href=\"rates.php\">Rates</a></td></tr>";
 if($access->lookup==1) echo "<tr><td><a href=\"lookup.php\">Lookups</a></td></tr>";
 if($access->reports==1) echo "<tr><td><a href=\"reports.php\">Reports</a></td></tr>";
-free_result($access);
-?>
+$access->closeCursor();

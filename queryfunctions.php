@@ -21,68 +21,27 @@ check for license.txt at the root folder
 For any details please feel free to contact me at taifa@users.sourceforge.net
 Or for snail mail. P. O. Box 938, Kilifi-80108, East Africa-Kenya.
 /*****************************************************************************/
-function db_connect($HOST,$USER,$PASS,$DB,$PORT)
-{
-	$conn = mysql_connect($HOST . ":" . $PORT , $USER, $PASS);
-	mysql_select_db($DB);
-	return $conn;
+
+$GLOBALS[ __FILE__ ] = new PDO( 'mysql:host=localhost;dbname=pdo', 'pdo', 'password', array(
+	PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT,
+	PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
+) );
+
+function db_query( $query, $params = array() ) {
+	$stmt = $GLOBALS[ __FILE__ ]->prepare( $query );
+	if ( $stmt ) {
+		$stmt->execute( $params );
+		return $stmt;
+	}
+	return false;
 }
 
-function db_close($conn)
-{
-	mysql_close($conn);
+function db_errno() {
+	$errors = $GLOBALS[ __FILE__ ]->errorInfo();
+	return $errors[ 1 ];
 }
 
-//get data from table
-function mkr_query($strsql,$conn)
-{
-	$rs = mysql_query($strsql,$conn);
-	return $rs;
+function db_error() {
+	$errors = $GLOBALS[ __FILE__ ]->errorInfo();
+	return $errors[ 2 ];
 }
-
-//get number of rows in results sets
-function num_rows($rs)
-{
-	return @mysql_num_rows($rs); 
-}
-
-function fetch_array($rs)
-{
-	return mysql_fetch_array($rs);
-}
-
-//fetch object
-function fetch_object($rs)
-{
-	return mysql_fetch_object($rs);
-}
-
-function free_result($rs)
-{
-	@mysql_free_result($rs);
-}
-
-function data_seek($rs,$cnt)
-{
-	@mysql_data_seek($rs, $cnt);
-}
-
-function error()
-{
-	return mysql_error();
-}
-?>
-
-<?php
-	define("HOST", "localhost");
-	define("PORT", 3306);
-	define("USER", "root");
-	define("PASS", "sa");
-	define("DB", "hotelmis");
-	
-	/*define("HOST", "mysql4-h");
-	define("PORT", 3306);
-	define("USER", "h172638rw");
-	define("PASS", "hotelmis321");
-	define("DB", "h172638_hotelmis");*/
-?>

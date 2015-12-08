@@ -27,7 +27,6 @@ include_once ("queryfunctions.php");
 include_once ("functions.php");
 
 if (isset($_POST['Submit'])){
-	$conn=db_connect(HOST,USER,PASS,DB,PORT);
 	$action=$_POST['Submit'];
 	switch ($action) {
 		case 'List':
@@ -35,9 +34,11 @@ if (isset($_POST['Submit'])){
 		case 'Find':
 			//check if user is searching using name, payrollno, national id number or other fields
 			$search=$_POST["search"];
-			$sql="Select agentname,agents_ac_no,contact_person,telephone,fax,email,billing_address,town,postal_code,road_street,building From agents where agentcode='$search'";
-			$results=mkr_query($sql,$conn);
-			$agent=fetch_object($results);
+			$results = db_query( '
+				SELECT agentname, agents_ac_no, contact_person, telephone, fax, email, billing_address, town, postal_code, road_street, building
+				FROM agents
+				WHERE agentcode = ?', array( $search ) );
+			$agent = $results->fetch();
 			break;
 	}
 
@@ -162,7 +163,6 @@ function loadHTMLPost(URL, destination){
 	  <tr>
         <td colspan="2"><div id="Requests">
 		<?php
-			$conn=db_connect(HOST,USER,PASS,DB,PORT);
 			/*$sql="Select rooms.roomno,concat_ws(' ',guests.firstname,guests.middlename,guests.lastname) as guest,
 				booking.checkin_date,booking.checkout_date,DATEDIFF(booking.checkout_date,booking.checkin_date) as nights,
 				booking.meal_plan,booking.no_adults,booking.no_child
@@ -171,14 +171,14 @@ function loadHTMLPost(URL, destination){
 				left Join guests ON booking.guestid = guests.guestid
 				Where year(booking.checkin_date ) = '2006' AND month(booking.checkin_date ) = '7'
 				Order By booking.checkin_date Asc";*/
-			$sql="Select rooms.roomno,guests.guestid,concat_ws(' ',guests.firstname,guests.middlename,guests.lastname) AS guest,
-				booking.checkin_date,booking.checkout_date,DATEDIFF(booking.checkout_date,booking.checkin_date) AS nights,
-				booking.meal_plan,booking.no_adults,booking.no_child,rooms.`status`
-				From rooms
-				left Join booking ON rooms.roomid = booking.roomid
-				left Join guests ON booking.guestid = guests.guestid
-				Order By rooms.roomno Asc";	
-			$results=mkr_query($sql,$conn);
+			$results = db_query( '
+				SELECT rooms.roomno, guests.guestid, CONCAT_WS(" ", guests.firstname, guests.middlename, guests.lastname) AS guest,
+					booking.checkin_date, booking.checkout_date, DATEDIFF(booking.checkout_date, booking.checkin_date) AS nights,
+					booking.meal_plan, booking.no_adults, booking.no_child, rooms.status
+				FROM rooms
+				LEFT JOIN booking ON rooms.roomid = booking.roomid
+				LEFT JOIN guests ON booking.guestid = guests.guestid
+				ORDER BY rooms.roomno ASC' );
 			echo "<table align=\"center\">";
 			//get field names to create the column header
 			echo "<tr bgcolor=\"#009999\">
@@ -195,7 +195,7 @@ function loadHTMLPost(URL, destination){
 				</tr>";
 			//end of field header
 			//get data from selected table on the selected fields
-			while ($booked = fetch_object($results)) {
+			while ( $booked = $results->fetch() ) {
 				//alternate row colour
 				$j++;
 				if($j%2==1){

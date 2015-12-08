@@ -24,7 +24,6 @@ include_once("login_check.inc.php");
 include_once ("queryfunctions.php");
 include_once ("functions.php");
 access("admin"); //check if user is allowed to access this page
-$conn=db_connect(HOST,USER,PASS,DB,PORT);
 
 if (isset($_GET["search"])){
 	find($_GET["search"]);
@@ -73,14 +72,15 @@ if (isset($_POST['Submit'])){
 					echo "Put sql statement for updating here";
 					//echo different $msg0 & 1
 				}else{ //adding*/
-					$sql="INSERT INTO users (fname,sname,loginname,pass,phone,mobile,fax,email,dateregistered,admin,guest,reservation,booking,agents,rooms,billing,rates,lookup,reports)
-	 					VALUES('$fname','$sname','$loginname','$pass',$phone,$mobile,$fax,$email,now(),$admin,$guest,$reservation,$booking,$agents,$rooms,$billing,$rates,$lookup,$reports)";
+					$results = db_query( '
+						INSERT INTO users (fname, sname, loginname, pass, phone, mobile, fax, email, dateregistered, admin, guest, reservation, booking, agents, rooms, billing, rates, lookup, reports)
+						VALUES(?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+						array( $fname, $sname, $loginname, $pass, $phone, $mobile, $fax, $email, $admin, $guest, $reservation, $booking, $agents, $rooms, $billing, $rates, $lookup, $reports ) );
 				//}
-				
-				$results=mkr_query($sql,$conn);
+
 				$msg[0]="Sorry user account no created";
 				$msg[1]="User account created successful";
-				AddSuccess($results,$conn,$msg);	
+				AddSuccess( $results, $msg );
 			}
 			break;
 		case 'Update User':
@@ -98,15 +98,16 @@ if (isset($_POST['Submit'])){
 
 }
 
-function find($search){
-	global $conn,$users;
-	$search=$search;
-	$sql="select userid,fname,sname,loginname,pass,phone,mobile,fax,email,countrycode,admin,
-		guest,reservation,booking,agents,rooms,billing,rates,lookup,reports
-		From users where userid='$search'";
-	$results=mkr_query($sql,$conn);
-	$users=fetch_object($results);
+function find( $search ) {
+	global $users;
+	$results = db_query( '
+		SELECT userid, fname, sname, loginname, pass, phone, mobile, fax, email, countrycode, admin,
+		guest, reservation, booking, agents, rooms, billing, rates, lookup, reports
+		FROM users WHERE userid = ?',
+		array( $search ) );
+	$users = $results->fetch();
 }
+
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

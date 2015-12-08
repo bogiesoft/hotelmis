@@ -28,7 +28,6 @@ include_once ("functions.php");
 access("rooms"); //check if user is allowed to access this page
 
 if (isset($_POST['Submit'])){
-	$conn=db_connect(HOST,USER,PASS,DB,PORT);
 	$action=$_POST['Submit'];
 	switch ($action) {
 		case 'Add Rooms Detail':
@@ -69,10 +68,11 @@ if (isset($_POST['Submit'])){
 				$photo=!empty($_POST["photo"]) ? "'" . $photo . "'" : 'NULL';
 				$filetype=!empty($_POST["filetype"]) ? "'" . $filetype . "'" : 'NULL';
 				
-				$sql="INSERT INTO rooms (roomno,roomtypeid,roomname,noofrooms,occupancy,tv,aircondition,fun,safe,fridge,status,photo,filetype)
-				 VALUES($roomno,$roomtypeid,$roomname,$noofrooms,$occupancy,$tv,$aircondition,$fun,$safe,$fridge,$status,$photo,$filetype)";
-				$results=mkr_query($sql,$conn);		
-				AddSuccess($results,$conn);
+				$results = db_query( '
+					INSERT INTO rooms (roomno, roomtypeid, roomname, noofrooms, occupancy, tv, aircondition, fun, safe, fridge, status, photo, filetype)
+					VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+					array( $roomno, $roomtypeid, $roomname, $noofrooms, $occupancy, $tv, $aircondition, $fun, $safe, $fridge, $status, $photo, $filetype ) );
+				AddSuccess( $results );
 			}
 			break;
 		case 'List':
@@ -84,8 +84,13 @@ if (isset($_POST['Submit'])){
 			$sql="Select rooms.roomid,rooms.roomno,rooms.roomtypeid,roomtype.roomtype,rooms.roomname,
 			rooms.noofrooms,rooms.occupancy,rooms.tv,rooms.aircondition,rooms.fun,rooms.safe,rooms.fridge,rooms.status,rooms.photo
 			From rooms Inner Join roomtype ON rooms.roomtypeid = roomtype.roomtypeid where roomno='$search'";
-			$results=mkr_query($sql,$conn);
-			$rooms=fetch_object($results);
+			$results = db_query( '
+				SELECT rooms.roomid, rooms.roomno, rooms.roomtypeid, roomtype.roomtype, rooms.roomname,
+					rooms.noofrooms, rooms.occupancy, rooms.tv, rooms.aircondition, rooms.fun, rooms.safe, rooms.fridge, rooms.status, rooms.photo
+				FROM rooms
+				INNER JOIN roomtype ON rooms.roomtypeid = roomtype.roomtypeid
+				WHERE roomno = ?', array( $search ) );
+			$rooms = $results->fetch();
 			break;
 	}
 
@@ -306,28 +311,28 @@ function loadHTMLPost(URL, destination, button){
 </form>
 </body>
 </html>
+<?php
 
+/*
 <!--
 //view rooms image
 //include "config.php";
 include_once ("queryfunctions.php");
 
-$conn=db_connect(HOST,USER,PASS,DB,PORT);
 if (!empty($_REQUEST["id"]))	
 {	
 $imgid=$_REQUEST["id"];
-$sqlstr="select * from request where req_id='$imgid'";
+$sqlresult = db_query( 'SELECT * FROM request WHERE req_id = ?', array( $imgid ) );
 }
 else
-$sqlstr="select * from request limit 1";
+$sqlresult = db_query( 'SELECT * FROM request LIMIT 1' );
 
-$sqlresult=mkr_query($sqlstr,$conn);
-$data=fetch_object($sqlresult);
+$data = $sqlresult->fetch();
 
 $filetype=$data->filetype;
 //$filesize=$data->filesize;
 $data=$data->serialnos;
-$filetype=ereg_replace(" ", "", $filetype);
+$filetype = str_replace(" ", "", $filetype);
 
 Header("Content-type: $filetype");
 header("Cache-Control: private");
@@ -338,5 +343,6 @@ echo base64_decode($data);
 header("content-type: text/html");
 echo "</center>";
 print "<br>"; 
-free_result(sqlresult);
+$sqlresult->closeCursor();
 -->
+*/

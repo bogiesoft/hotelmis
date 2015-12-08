@@ -27,7 +27,6 @@ include_once ("queryfunctions.php");
 include_once ("functions.php");
 
 if (isset($_POST['Submit'])){
-	$conn=db_connect(HOST,USER,PASS,DB,PORT);
 	$action=$_POST['Submit'];
 	switch ($action) {
 		case 'List':
@@ -37,9 +36,11 @@ if (isset($_POST['Submit'])){
 		case 'Find':
 			//check if user is searching using name, payrollno, national id number or other fields
 			$search=$_POST["search"];
-			$sql="Select agentname,agents_ac_no,contact_person,telephone,fax,email,billing_address,town,postal_code,road_street,building From agents where agentcode='$search'";
-			$results=mkr_query($sql,$conn);
-			$agent=fetch_object($results);
+			$results = db_query( '
+				SELECT agentname, agents_ac_no, contact_person, telephone, fax, email, billing_address, town, postal_code, road_street, building
+				FROM agents
+				WHERE agentcode = ?', array( $search ) );
+			$agent = $results->fetch();
 			break;
 	}
 
@@ -146,15 +147,13 @@ function loadHTMLPost(URL, destination){
       <tr>
         <td><div id="Requests">
 		<?php
-			$sql="Select guests.guestid,concat_ws(' ',guests.firstname,guests.middlename,guests.lastname) as guest,booking.checkin_date,
-			booking.checkout_date,DATEDIFF(booking.checkout_date,booking.checkin_date) nights,
-			booking.meal_plan,booking.no_adults,booking.no_child,booking.roomid,booking.checkedin_by,rooms.roomno,booking.book_id
-			From booking
-			Inner Join guests ON booking.guestid = guests.guestid
-			Inner Join rooms ON booking.roomid = rooms.roomid";
-			$conn=db_connect(HOST,USER,PASS,DB,PORT);
-			$results=mkr_query($sql,$conn);
-			
+			$results = db_query( '
+				SELECT guests.guestid, CONCAT_WS(" ", guests.firstname, guests.middlename, guests.lastname) AS guest, booking.checkin_date,
+					booking.checkout_date, DATEDIFF(booking.checkout_date, booking.checkin_date) AS nights,
+					booking.meal_plan, booking.no_adults, booking.no_child, booking.roomid, booking.checkedin_by, rooms.roomno, booking.book_id
+				FROM booking
+				INNER JOIN guests ON booking.guestid = guests.guestid
+				INNER JOIN rooms ON booking.roomid = rooms.roomid' );
 			echo "<table align=\"center\">";
 			//get field names to create the column header
 			echo "<tr bgcolor=\"#009999\">
@@ -170,7 +169,7 @@ function loadHTMLPost(URL, destination){
 				</tr>";
 				//end of field header
 				//get data from selected table on the selected fields
-			while ($booking = fetch_object($results)) {
+			while ( $booking = $results->fetch() ) {
 			//alternate row colour
 				$j++;
 				if($j%2==1){

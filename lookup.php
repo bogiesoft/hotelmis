@@ -28,7 +28,6 @@ include_once ("functions.php");
 access("lookup"); //check if user is allowed to access this page
 
 if (isset($_POST['Submit'])){
-	$conn=db_connect(HOST,USER,PASS,DB,PORT);
 	$action=$_POST['Submit'];
 	switch ($action) {
 		case 'Add Transaction Details':
@@ -46,12 +45,12 @@ if (isset($_POST['Submit'])){
 				$description=!empty($_POST["description"]) ? "'" . $_POST["description"] . "'" : 'NULL';
 				$sale=!empty($_POST["sale"]) ? $_POST["sale"] : 'NULL';
 				$expense=!empty($_POST["expense"]) ? $_POST["expense"] : 'NULL';
-				$sql="INSERT INTO details (item,description,sale,expense)
-				 VALUES('$item',$description,$sale,$expense)";
-				$results=mkr_query($sql,$conn);		
+				$results = db_query( '
+					INSERT INTO details (item, description, sale, expense)
+					VALUES(?, ?, ?, ?)', array( $item, $description, $sale, $expense ) );
 				$msg[0]="Sorry item not added";
 				$msg[1]="Item successfull added";
-				AddSuccess($results,$conn,$msg);
+				AddSuccess( $results, $msg );
 			}
 			break;
 		case 'Add Document':
@@ -73,12 +72,12 @@ if (isset($_POST['Submit'])){
 				$cooperative=!empty($_POST["cooperative"]) ? $_POST["cooperative"] : 'NULL';
 				$payroll=!empty($_POST["payroll"]) ? $_POST["payroll"] : 'NULL';
 				
-				$sql="INSERT INTO doctypes (doc_code,doc_type,remarks,accounts,cooperative,payroll)
-				 VALUES($doc_code,$doc_type,$remarks,$accounts,$cooperative,$payroll)";
-				$results=mkr_query($sql,$conn);		
+				$results = db_query( '
+					INSERT INTO doctypes (doc_code, doc_type, remarks, accounts, cooperative, payroll)
+					VALUES(?, ?, ?, ?, ?, ?)', array( $doc_code, $doc_type, $remarks, $accounts, $cooperative, $payroll ) );
 				$msg[0]="Sorry document type not added";
 				$msg[1]="Document type successfull added";
-				AddSuccess($results,$conn,$msg);
+				AddSuccess( $results, $msg );
 			}
 			break;
 		case 'Add Transaction Type':
@@ -100,12 +99,12 @@ if (isset($_POST['Submit'])){
 				$cooperative=!empty($_POST["cooperative"]) ? $_POST["cooperative"] : 'NULL';
 				$payroll=!empty($_POST["payroll"]) ? $_POST["payroll"] : 'NULL';
 				
-				$sql="INSERT INTO transtype (trans_code,trans_type,remarks,accounts,cooperative,payroll)
-				 VALUES($trans_code,$trans_type,$remarks,$accounts,$cooperative,$payroll)";
-				$results=mkr_query($sql,$conn);		
+				$results = db_query( '
+					INSERT INTO transtype (trans_code, trans_type, remarks, accounts, cooperative, payroll)
+					VALUES(?, ?, ?, ?, ?, ?)', array( $trans_code, $trans_type, $remarks, $accounts, $cooperative, $payroll ) );
 				$msg[0]="Sorry transaction type not added";
 				$msg[1]="Transaction type successfull added";
-				AddSuccess($results,$conn,$msg);
+				AddSuccess( $results, $msg );
 			}
 			break;
 		case 'Add Payment Mode':
@@ -120,21 +119,22 @@ if (isset($_POST['Submit'])){
 			}
 			else {
 				$payment_option=!empty($_POST["payment_option"]) ? "'" . $_POST["payment_option"] . "'" : 'NULL';
-				$sql="INSERT INTO payment_mode (payment_option) VALUES($payment_option)";
-				$results=mkr_query($sql,$conn);		
+				$results = db_query( 'INSERT INTO payment_mode (payment_option) VALUES(?)', array( $payment_option ) );
 				$msg[0]="Sorry payment mode not added";
 				$msg[1]="Payment mode successfull added";
-				AddSuccess($results,$conn,$msg);
+				AddSuccess( $results, $msg );
 			}
 			break;							
 		case 'Find':
 			//check if user is searching using name, payrollno, national id number or other fields
 			$search=$_POST["search"];
-			$sql="Select rooms.roomid,rooms.roomno,rooms.roomtypeid,roomtype.roomtype,rooms.roomname,
-			rooms.noofrooms,rooms.occupancy,rooms.tv,rooms.aircondition,rooms.fun,rooms.safe,rooms.fridge,rooms.reserverd,rooms.photo
-			From rooms Inner Join roomtype ON rooms.roomtypeid = roomtype.roomtypeid where roomno='$search'";
-			$results=mkr_query($sql,$conn);
-			$rooms=fetch_object($results);
+			$results = db_query( '
+				SELECT rooms.roomid, rooms.roomno, rooms.roomtypeid, roomtype.roomtype, rooms.roomname,
+					rooms.noofrooms, rooms.occupancy, rooms.tv, rooms.aircondition, rooms.fun, rooms.safe, rooms.fridge, rooms.reserverd, rooms.photo
+				FROM rooms
+				INNER JOIN roomtype ON rooms.roomtypeid = roomtype.roomtypeid
+				WHERE roomno = ?', array( $search ) );
+			$rooms = $results->fetch();
 			break;
 	}
 }

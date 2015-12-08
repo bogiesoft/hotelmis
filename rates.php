@@ -28,7 +28,6 @@ include_once ("functions.php");
 access("rates"); //check if user is allowed to access this page
 
 if (isset($_POST['Submit'])){
-	$conn=db_connect(HOST,USER,PASS,DB,PORT);
 	$action=$_POST['Submit'];
 	switch ($action) {
 		case 'Add New Rates':
@@ -43,12 +42,12 @@ if (isset($_POST['Submit'])){
 			$date_started=$_POST["date_started"];
 			$date_stopped=$_POST["date_stopped"];
 			
-			$sql="INSERT INTO rates (bookingtype,occupancy,rate_type,bo,bb,hb,fb,currency,date_started,date_stopped)
-			 VALUES('$bookingtype','$occupancy','$rate_type',$bo,$bb,$hb,$fb,'$currency','$date_started','$date_stopped')";
-			$results=mkr_query($sql,$conn);		
-			if ((int) $results==0){
+			$results = db_query( '
+				INSERT INTO rates (bookingtype, occupancy, rate_type, bo, bb, hb, fb, currency, date_started, date_stopped)
+				VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', array( $bookingtype, $occupancy, $rate_type, $bo, $bb, $hb, $fb, $currency, $date_started, $date_stopped ) );
+			if ( ! $results || $results->rowCount() == 0 ) {
 				//should log mysql errors to a file instead of displaying them to the user
-				echo 'Invalid query: ' . mysql_errno($conn). "<br>" . ": " . mysql_error($conn). "<br>";
+				echo 'Invalid query: ' . db_errno(). "<br>" . ": " . db_error(). "<br>";
 				echo "Record NOT ADDED.";  //return;
 			}else{
 				echo "<div align=\"center\"><h1>Record successfully added.</h1></div>";
@@ -61,11 +60,13 @@ if (isset($_POST['Submit'])){
 		case 'Find':
 			//check if user is searching using name, payrollno, national id number or other fields
 			$search=$_POST["search"];
-			$sql="Select rooms.roomid,rooms.roomno,rooms.roomtypeid,roomtype.roomtype,rooms.roomname,
-			rooms.noofrooms,rooms.occupancy,rooms.tv,rooms.aircondition,rooms.fun,rooms.safe,rooms.fridge,rooms.reserverd,rooms.photo
-			From rooms Inner Join roomtype ON rooms.roomtypeid = roomtype.roomtypeid where roomno='$search'";
-			$results=mkr_query($sql,$conn);
-			$rooms=fetch_object($results);
+			$results = db_query( '
+				SELECT rooms.roomid, rooms.roomno, rooms.roomtypeid, roomtype.roomtype, rooms.roomname,
+					rooms.noofrooms, rooms.occupancy, rooms.tv, rooms.aircondition, rooms.fun, rooms.safe, rooms.fridge, rooms.reserverd, rooms.photo
+				FROM rooms
+				INNER JOIN roomtype ON rooms.roomtypeid = roomtype.roomtypeid
+				WHERE roomno = ?', array( $search ) );
+			$rooms = $results->fetch();
 			break;
 		case 'Rates':
 			echo "Rates";
