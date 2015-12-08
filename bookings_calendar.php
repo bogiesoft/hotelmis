@@ -15,7 +15,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with this program;
-if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA or 
+if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA or
 check for license.txt at the root folder
 /*****************************************************************************
 For any details please feel free to contact me at taifa@users.sourceforge.net
@@ -53,7 +53,7 @@ if (isset($_POST['Submit'])){
 			else {
 				$booking_type=$_POST["booking_type"];
 				$meal_plan=$_POST["meal_plan"];
-				$no_adults=$_POST["no_adults"];			
+				$no_adults=$_POST["no_adults"];
 				$no_child= $_POST["no_child"];
 				$checkin_date= "'" . $_POST["checkin_date"] . "'" ;
 				$checkout_date=!empty($_POST["checkout_date"]) ? "'" . $_POST["checkout_date"] . "'" : 'NULL';
@@ -74,7 +74,7 @@ if (isset($_POST['Submit'])){
 					echo "Guests NOT BOOKED.";  //return;
 				}else{
 					echo "<div align=\"center\"><h1>Guests successful checked in.</h1></div>";
-				}				
+				}
 			}
 			find($guestid);
 			break;
@@ -116,7 +116,7 @@ if (isset($_POST['Submit'])){
 					echo "<td>" . $booking->checkout_date . "</td>";
 					echo "<td>" . $booking->no_adults . "</td>";
 					echo "<td>" . $booking->no_child . "</td>";
-					echo "<td>" . $booking->roomno . "</td>";					
+					echo "<td>" . $booking->roomno . "</td>";
 				echo "</tr>"; //end of - data rows
 			} //end of while row
 			echo "</table>";
@@ -156,7 +156,7 @@ function find($search){
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-<link href="css/new.css" rel="stylesheet" type="text/css">
+<?php include('csslinks.php'); ?>
 <title>Hotel Management Information System</title>
 
 <script type="text/javascript">
@@ -216,7 +216,7 @@ function Nights(){
 alert (document.getElementById('arrivaldate').value);
 alert (document.getElementById('departuredate').value);
 }
-//-->	 
+//-->
 </script>
 </script>
 <script language="javascript" src="js/cal2.js">
@@ -235,7 +235,7 @@ This notice must stay intact for use
   <tr valign="top">
     <td width="19%" bgcolor="#FFFFFF">
 	<table width="100%"  border="0" cellpadding="1">
-	  
+
 	  <tr>
     <td width="15%" bgcolor="#66CCCC">
 		<table cellspacing=0 cellpadding=0 width="100%" align="left" bgcolor="#FFFFFF">
@@ -246,13 +246,13 @@ This notice must stay intact for use
       </tr>
       <tr>
         <td align="center">
-		<?php signon(); ?>		
+		<?php signon(); ?>
 		</td></tr>
 	  </table></td></tr>
-		<?php require_once("menu_header.php"); ?>		
+		<?php require_once("menu_header.php"); ?>
     </table>
 	</td>
-    
+
     <td width="81%" bgcolor="#FFFFFF"><table width="100%"  border="0" cellpadding="1">
 
       <tr>
@@ -301,19 +301,19 @@ This notice must stay intact for use
 	$year=$_POST["year"];
 	/* Commented out as unused.
 	$sqloriginal = "Select rooms.roomno,rooms.status,booking.guestid,guests.lastname,guests.firstname,guests.middlename,DAYOFMONTH(booking.checkin_date) chkin_day,
-	 		MONTH(booking.checkin_date) chkin_month, YEAR(booking.checkin_date) chkin_year,booking.checkin_date,booking.checkout_date, DATEDIFF(booking.checkout_date,booking.checkin_date) nights 
-         From rooms left Join booking ON rooms.roomid = booking.roomid 
-         left Join guests ON booking.guestid = guests.guestid 
+	 		MONTH(booking.checkin_date) chkin_month, YEAR(booking.checkin_date) chkin_year,booking.checkin_date,booking.checkout_date, DATEDIFF(booking.checkout_date,booking.checkin_date) nights
+         From rooms left Join booking ON rooms.roomid = booking.roomid
+         left Join guests ON booking.guestid = guests.guestid
          Order By rooms.roomno Asc";
 	// */
 	/*$sql = "Select rooms.roomno,booking.guestid,guests.lastname,guests.firstname,guests.middlename,DAYOFMONTH(booking.checkin_date) chkin_day,
 	 		MONTH(booking.checkin_date) chkin_month, YEAR(booking.checkin_date) chkin_year,booking.checkin_date,booking.checkout_date, DATEDIFF(booking.checkout_date,booking.checkin_date) nights
-         From rooms left Join booking ON rooms.roomid = booking.roomid 
-         left Join guests ON booking.guestid = guests.guestid 
+         From rooms left Join booking ON rooms.roomid = booking.roomid
+         left Join guests ON booking.guestid = guests.guestid
          Where MONTH(booking.checkin_date)='$month' and YEAR(booking.checkin_date)='$year'
          Order By rooms.roomno Asc";*/
-		 
-		 
+
+
 		 //Booking and reservation data on same row separate columns;
 	$results = db_query( '
 		SELECT rooms.roomno, rooms.status, booking.guestid,
@@ -338,7 +338,7 @@ This notice must stay intact for use
 		ORDER BY rooms.roomno ASC' );
 	$numrows = $results->rowCount();
 	while ( $row = $results->fetch() ) {
-		echo "<tr><td>$row->roomno</td>";	
+		echo "<tr><td>$row->roomno</td>";
 		//get field names to create the column header
 		for($i=1; $i<=31; $i++){
 			//check status and set colour
@@ -355,7 +355,7 @@ This notice must stay intact for use
 					$status="Reserved";
 					$statusday=$row->r_chkin_day;
 					$statusnights=$row->r_nights;
-					$statusguest=$row->r_guest;					
+					$statusguest=$row->r_guest;
 					break;
 				case "B":
 					$color='bgcolor="#FFA500"';
@@ -369,11 +369,11 @@ This notice must stay intact for use
 					$status="Blocked";
 					$statusday=0;
 					$statusnights=0;
-					$statusguest="";					
+					$statusguest="";
 					break;
 			}
-			
-			//decide whether to show status of locked and vacant rooms;			
+
+			//decide whether to show status of locked and vacant rooms;
 			if ($i==$statusday){
 				echo "<td $color colspan=\"$statusnights\">$statusguest: $status</td>";
 				$i= $i + ($statusnights-1);
@@ -386,7 +386,7 @@ This notice must stay intact for use
 	$results->closeCursor();
 	echo "</table>";
 	 ?> </div></td>
-		
+
       </tr>
 	  <tr bgcolor="#66CCCC" >
         <td align="left">

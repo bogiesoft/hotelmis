@@ -15,7 +15,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with this program;
-if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA or 
+if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA or
 check for license.txt at the root folder
 /*****************************************************************************
 For any details please feel free to contact me at taifa@users.sourceforge.net
@@ -51,7 +51,7 @@ if (isset($_POST['Submit'])){
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-<link href="css/new.css" rel="stylesheet" type="text/css">
+<?php include('csslinks.php'); ?>
 <title>Hotel Management Information System</title>
 
 <script type="text/javascript">
@@ -107,7 +107,7 @@ function loadHTMLPost(URL, destination){
         }
     }
 }
-//-->	 
+//-->
 </script>
 <script language="JavaScript" src="js/highlight.js" type="text/javascript"></script>
 </head>
@@ -117,7 +117,7 @@ function loadHTMLPost(URL, destination){
 <table width="100%"  border="0" cellpadding="1" align="center" bgcolor="#66CCCC">
   <tr valign="top">
     <td width="17%" bgcolor="#FFFFFF">
-	<table width="100%"  border="0" cellpadding="1">	  
+	<table width="100%"  border="0" cellpadding="1">
 	  <tr>
     <td width="15%" bgcolor="#66CCCC">
 		<table cellspacing=0 cellpadding=0 width="100%" align="left" bgcolor="#FFFFFF">
@@ -128,13 +128,13 @@ function loadHTMLPost(URL, destination){
       </tr>
       <tr>
         <td align="center">
-		<?php signon(); ?>		
+		<?php signon(); ?>
 		</td></tr>
 	  </table></td></tr>
-		<?php require_once("menu_header.php"); ?>	
+		<?php require_once("menu_header.php"); ?>
     </table>
 	</td>
-    
+
     <td width="67%" bgcolor="#FFFFFF"><table width="100%"  border="0" cellpadding="1">
       <tr>
         <td align="center"></td>
@@ -177,21 +177,21 @@ function loadHTMLPost(URL, destination){
 					}else{
 					echo "<tr id=\"row$j\" onmouseover=\"javascript:setColor('$j')\" onmouseout=\"javascript:origColor('$j')\" bgcolor=\"#EEEEF8\">";
 				}
-					echo "<td><a href=\"bookings.php?search=$booking->book_id\"><img src=\"images/button_view.png\" width=\"16\" height=\"16\" border=\"0\" title=\"view booking details\"/></a></td>";					
+					echo "<td><a href=\"bookings.php?search=$booking->book_id\"><img src=\"images/button_view.png\" width=\"16\" height=\"16\" border=\"0\" title=\"view booking details\"/></a></td>";
 					echo "<td><a href=\"billings.php?search=$booking->guestid\"><img src=\"images/button_signout.png\" width=\"16\" height=\"16\" border=\"0\" title=\"bill guest\"/></a></td>";
-					echo "<td>" . $booking->roomno . "</td>";					
+					echo "<td>" . $booking->roomno . "</td>";
 					echo "<td>" . trim($booking->guest) . "</td>";
 					echo "<td>" . $booking->meal_plan . "</td>";
 					echo "<td>" . $booking->checkin_date . "</td>";
 					echo "<td>" . $booking->checkout_date . "</td>";
-					echo "<td>" . $booking->nights . "</td>";			
+					echo "<td>" . $booking->nights . "</td>";
 					echo "<td>" . $booking->no_adults . "</td>";
 					echo "<td>" . $booking->no_child . "</td>";
 				echo "</tr>"; //end of - data rows
 			} //end of while row
 			echo "</table>";
 		?>
-		</div></td>		
+		</div></td>
       </tr>
 	  <tr bgcolor="#66CCCC" >
         <td align="left"><div id="RequestDetails"></div>
@@ -199,7 +199,7 @@ function loadHTMLPost(URL, destination){
       </tr>
     </table></td>
 	<td width="16%" bgcolor="#FFFFFF">
-	<table width="100%"  border="0" cellpadding="1">	  
+	<table width="100%"  border="0" cellpadding="1">
 	  <tr>
     <td width="15%" bgcolor="#66CCCC">
 	<table width="100%"  border="0" cellpadding="1" bgcolor="#FFFFFF">

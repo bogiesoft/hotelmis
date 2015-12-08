@@ -15,14 +15,14 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with this program;
-if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA or 
+if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA or
 check for license.txt at the root folder
 /*****************************************************************************
 For any details please feel free to contact me at taifa@users.sourceforge.net
 Or for snail mail. P. O. Box 938, Kilifi-80108, East Africa-Kenya.
 /*****************************************************************************/
 
-$GLOBALS[ __FILE__ ] = new PDO( 'mysql:host=localhost;dbname=pdo', 'pdo', 'password', array(
+$GLOBALS[ __FILE__ ] = new PDO( 'mysql:host=localhost;dbname=hotelmis', 'hotelmis', '55doolie', array(
 	PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT,
 	PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
 ) );

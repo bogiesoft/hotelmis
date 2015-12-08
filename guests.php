@@ -15,7 +15,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with this program;
-if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA or 
+if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA or
 check for license.txt at the root folder
 /*****************************************************************************
 For any details please feel free to contact me at taifa@users.sourceforge.net
@@ -28,14 +28,14 @@ include_once ("functions.php");
 access("guest"); //check if user is allowed to access this page
 if (isset($_GET["search"])){
 	find($_GET["search"]);
-}	
+}
 
 //consider having this as a function in the functions.php
 if (isset($_POST['Navigate'])){
 	//echo $_SESSION["strOffSet"];
 	$nRecords = db_query( 'SELECT * FROM guests' )->rowCount();
 	paginate($nRecords);
-	find($_SESSION["strOffSet"]);	
+	find($_SESSION["strOffSet"]);
 }
 
 if (isset($_POST['Submit'])){
@@ -60,7 +60,7 @@ if (isset($_POST['Submit'])){
 			else {
 				$firstname=$_POST["firstname"];
 				$middlename=$_POST["middlename"];
-				$lastname=$_POST["lastname"];			
+				$lastname=$_POST["lastname"];
 				$countrycode= $_POST["countrycode"];
 				$pp_no=($_POST["identification_no"]==ppno) ? "'" . $_POST["pp_id_no"] . "'" : 'NULL';
 				$idno=($_POST["identification_no"]==idno) ?  "'" . $_POST["pp_id_no"] . "'" : 'NULL';
@@ -70,7 +70,7 @@ if (isset($_POST['Submit'])){
 				$phone=$_POST["phone"];
 				$email=$_POST["email"];
 				$mobilephone=$_POST["mobilephone"];
-				
+
 				$results = db_query( '
 					INSERT INTO guests (lastname, firstname, middlename, pp_no, idno, countrycode, pobox, town, postal_code, phone,email, mobilephone)
 		 			VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
@@ -81,8 +81,8 @@ if (isset($_POST['Submit'])){
 					echo "Guests record NOT ADDED.";  //return;
 				}else{
 					echo "<div align=\"center\"><h1>Guests record successful added.</h1></div>";
-				}				
-			}						
+				}
+			}
 			break;
 		case 'List':
 
@@ -114,7 +114,7 @@ function find($search){
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-<link href="css/new.css" rel="stylesheet" type="text/css">
+<?php include('csslinks.php'); ?>
 <title>Hotel Management Information System</title>
 
 <script type="text/javascript">
@@ -178,7 +178,7 @@ function BookGuest(){
 		//check if guest with same id/pp no has been checked in.
 		guestid=document.getElementById('guestid').value;
 		self.location='bookings.php?search='+guestid
-	}	
+	}
 }
 
 function ReserveGuest(){
@@ -187,10 +187,10 @@ function ReserveGuest(){
 	}else{
 		guestid=guestid=document.getElementById('guestid').value;
 		self.location='reservations.php?search='+guestid
-	}	
+	}
 }
 
-//-->	 
+//-->
 </script>
 </head>
 
@@ -199,7 +199,7 @@ function ReserveGuest(){
 <table width="100%"  border="0" cellpadding="1" align="center" bgcolor="#66CCCC">
   <tr valign="top">
     <td width="17%" bgcolor="#FFFFFF">
-	<table width="100%"  border="0" cellpadding="1">	  
+	<table width="100%"  border="0" cellpadding="1">
 	  <tr>
     <td width="15%" bgcolor="#66CCCC">
 		<table cellspacing=0 cellpadding=0 width="100%" align="left" bgcolor="#FFFFFF">
@@ -211,14 +211,14 @@ function ReserveGuest(){
       </tr>
       <tr>
         <td align="center">
-		  <?php signon(); ?>		
+		  <?php signon(); ?>
 		</td>
       </tr>
 	  </table></td></tr>
-		<?php require_once("menu_header.php"); ?>				
+		<?php require_once("menu_header.php"); ?>
     </table>
 	</td>
-    
+
     <td width="65%" bgcolor="#FFFFFF"><table width="100%"  border="0" cellpadding="1">
       <tr>
         <td width="13%" align="center"></td>
@@ -318,7 +318,7 @@ function ReserveGuest(){
             </tr>
           </table>
                 </div></td>
-		
+
       </tr>
 	  <tr bgcolor="#66CCCC" >
         <td align="left" colspan="2"><div id="RequestDetails"></div>
@@ -326,11 +326,11 @@ function ReserveGuest(){
       </tr>
     </table></td>
 	<td width="18%" bgcolor="#FFFFFF">
-	
-	<table width="100%"  border="0" cellpadding="1">	  
+
+	<table width="100%"  border="0" cellpadding="1">
 	  <tr>
     <td width="15%" bgcolor="#66CCCC">
-	
+
 	<table width="100%"  border="0" cellpadding="1" bgcolor="#FFFFFF" >
        <tr>
         <td>Image</td>
@@ -346,7 +346,7 @@ function ReserveGuest(){
       </tr>
       <tr>
         <td>&nbsp;</td>
-      </tr>	  
+      </tr>
       <tr>
         <td>
             <label> Search By:<br />

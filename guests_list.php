@@ -15,7 +15,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with this program;
-if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA or 
+if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA or
 check for license.txt at the root folder
 /*****************************************************************************
 For any details please feel free to contact me at taifa@users.sourceforge.net
@@ -54,7 +54,7 @@ if (isset($_POST['Submit'])){
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-<link href="css/new.css" rel="stylesheet" type="text/css">
+<?php include('csslinks.php'); ?>
 <title>Hotel Management Information System</title>
 
 <script type="text/javascript">
@@ -110,7 +110,7 @@ function loadHTMLPost(URL, destination, button){
         }
     }
 }
-//-->	 
+//-->
 </script>
 <script language="JavaScript" src="js/highlight.js" type="text/javascript"></script>
 </head>
@@ -120,7 +120,7 @@ function loadHTMLPost(URL, destination, button){
 <table width="100%"  border="0" cellpadding="1" align="center" bgcolor="#66CCCC">
   <tr valign="top">
     <td width="17%" bgcolor="#FFFFFF">
-	<table width="100%"  border="0" cellpadding="1">	  
+	<table width="100%"  border="0" cellpadding="1">
 	  <tr>
     <td width="15%" bgcolor="#66CCCC">
 		<table cellspacing=0 cellpadding=0 width="100%" align="left" bgcolor="#FFFFFF">
@@ -131,13 +131,13 @@ function loadHTMLPost(URL, destination, button){
       </tr>
       <tr>
         <td align="center">
-		<?php signon(); ?>		
+		<?php signon(); ?>
 		</td></tr>
 	  </table></td></tr>
-		<?php require_once("menu_header.php"); ?>				
+		<?php require_once("menu_header.php"); ?>
     </table>
 	</td>
-    
+
     <td width="67%" bgcolor="#FFFFFF"><table width="100%"  border="0" cellpadding="1">
       <tr>
         <td align="center"></td>
@@ -147,17 +147,17 @@ function loadHTMLPost(URL, destination, button){
 		<h2>Guests List </h2>
 		</td>
       </tr>
-	  <tr bgcolor="#FF9900"><td><h1>View Options </h1></td> 
+	  <tr bgcolor="#FF9900"><td><h1>View Options </h1></td>
 	  <td>
           <label><input type="radio" name="roomstatus" onclick="loadHTMLPost('reportqueries.php','Requests','all')" style="cursor:pointer"/>All</label>
           <label><input type="radio" name="roomstatus" onclick="loadHTMLPost('reportqueries.php','Requests','booked')" style="cursor:pointer"/>Booked</label>
           <label><input type="radio" name="roomstatus" onclick="loadHTMLPost('reportqueries.php','Requests','reserved')" style="cursor:pointer"/>Reserved</label>
           <label><input type="radio" name="roomstatus" onclick="loadHTMLPost('reportqueries.php','Requests','arrivals')" style="cursor:pointer"/>Arrivals</label>
-          <label><input type="radio" name="roomstatus" onclick="loadHTMLPost('reportqueries.php','Requests','departures')" style="cursor:pointer"/>Departures</label>    
+          <label><input type="radio" name="roomstatus" onclick="loadHTMLPost('reportqueries.php','Requests','departures')" style="cursor:pointer"/>Departures</label>
 	</td></tr>
       <tr>
         <td colspan="2"><div id="Requests">
-				</div></td>		
+				</div></td>
       </tr>
 	  <tr bgcolor="#66CCCC" >
         <td align="left" colspan="2"><div id="RequestDetails"></div>
@@ -165,7 +165,7 @@ function loadHTMLPost(URL, destination, button){
       </tr>
     </table></td>
 	<td width="16%" bgcolor="#FFFFFF">
-	<table width="100%"  border="0" cellpadding="1">	  
+	<table width="100%"  border="0" cellpadding="1">
 	  <tr>
     <td width="15%" bgcolor="#66CCCC">
 	<table width="100%"  border="0" cellpadding="1" bgcolor="#FFFFFF">
