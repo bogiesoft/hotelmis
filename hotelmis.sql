@@ -1,20 +1,20 @@
 -- phpMyAdmin SQL Dump
 -- version 2.8.1
 -- http://www.phpmyadmin.net
--- 
+--
 -- Host: localhost:3306
 -- Generation Time: Sep 05, 2006 at 04:27 PM
 -- Server version: 5.0.15
 -- PHP Version: 5.0.5
--- 
+--
 -- Database: `hotelmis`
--- 
+--
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table `agents`
--- 
+--
 
 CREATE TABLE `agents` (
   `agentid` int(11) NOT NULL auto_increment,
@@ -34,9 +34,9 @@ CREATE TABLE `agents` (
   UNIQUE KEY `agentcode` (`agents_ac_no`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='InnoDB free: 120832 kB; InnoDB free: 120832 kB; InnoDB free:' AUTO_INCREMENT=12 ;
 
--- 
+--
 -- Dumping data for table `agents`
--- 
+--
 
 INSERT INTO `agents` (`agentid`, `agentname`, `agents_ac_no`, `contact_person`, `telephone`, `fax`, `email`, `billing_address`, `town`, `postal_code`, `road_street`, `building`, `ratesid`) VALUES (1, 'Kemri', 'K001', 'Hamida', '254-(0)41-522063', NULL, NULL, '230', 'Kilifi', 80108, NULL, NULL, 0),
 (2, 'Plan', 'K002', 'Johnson', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0),
@@ -50,9 +50,9 @@ INSERT INTO `agents` (`agentid`, `agentname`, `agents_ac_no`, `contact_person`, 
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table `bills`
--- 
+--
 
 CREATE TABLE `bills` (
   `bill_id` int(11) NOT NULL auto_increment,
@@ -64,9 +64,9 @@ CREATE TABLE `bills` (
   PRIMARY KEY  (`bill_id`,`billno`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='InnoDB free: 120832 kB; InnoDB free: 120832 kB; InnoDB free:' AUTO_INCREMENT=5 ;
 
--- 
+--
 -- Dumping data for table `bills`
--- 
+--
 
 INSERT INTO `bills` (`bill_id`, `book_id`, `date_billed`, `billno`, `status`, `date_checked`) VALUES (1, 1, '2006-08-22 00:00:00', 1, NULL, NULL),
 (2, 2, '2006-08-27 00:00:00', 2, NULL, NULL),
@@ -75,9 +75,9 @@ INSERT INTO `bills` (`bill_id`, `book_id`, `date_billed`, `billno`, `status`, `d
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table `booking`
--- 
+--
 
 CREATE TABLE `booking` (
   `book_id` int(11) NOT NULL auto_increment,
@@ -101,9 +101,9 @@ CREATE TABLE `booking` (
   UNIQUE KEY `id` (`book_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='InnoDB free: 121856 kB; InnoDB free: 115712 kB; InnoDB free:' AUTO_INCREMENT=4 ;
 
--- 
+--
 -- Dumping data for table `booking`
--- 
+--
 
 INSERT INTO `booking` (`book_id`, `guestid`, `booking_type`, `meal_plan`, `no_adults`, `no_child`, `checkin_date`, `checkout_date`, `residence_id`, `payment_mode`, `agents_ac_no`, `roomid`, `checkedin_by`, `invoice_no`, `billed`, `checkoutby`, `codatetime`) VALUES (1, '1', 'D', 'BB', 1, NULL, '2006-08-22', '2006-08-25', 'KE', 1, NULL, 11, 1, NULL, 1, 2, '2006-08-22 16:02:08'),
 (2, '2', 'A', 'BO', 1, NULL, '2006-08-27', '2006-08-29', 'KE', 1, NULL, 19, 1, NULL, 1, 2, '2006-08-25 14:52:01'),
@@ -111,9 +111,9 @@ INSERT INTO `booking` (`book_id`, `guestid`, `booking_type`, `meal_plan`, `no_ad
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table `countries`
--- 
+--
 
 CREATE TABLE `countries` (
   `countryid` smallint(6) NOT NULL auto_increment,
@@ -127,9 +127,9 @@ CREATE TABLE `countries` (
   KEY `country` (`country`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='InnoDB free: 121856 kB; InnoDB free: 121856 kB; InnoDB free:' AUTO_INCREMENT=245 ;
 
--- 
+--
 -- Dumping data for table `countries`
--- 
+--
 
 INSERT INTO `countries` (`countryid`, `country`, `countrycode`, `subscriber`, `nationality`, `currency`) VALUES (1, 'ANDORRA, PRINCIPALITY OF                               ', 'AD', '', NULL, NULL),
 (2, 'UNITED ARAB EMIRATES                                   ', 'AE', '971', NULL, NULL),
@@ -378,9 +378,9 @@ INSERT INTO `countries` (`countryid`, `country`, `countrycode`, `subscriber`, `n
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table `details`
--- 
+--
 
 CREATE TABLE `details` (
   `itemid` int(11) NOT NULL auto_increment,
@@ -391,9 +391,9 @@ CREATE TABLE `details` (
   PRIMARY KEY  (`itemid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='InnoDB free: 120832 kB; InnoDB free: 120832 kB; InnoDB free:' AUTO_INCREMENT=8 ;
 
--- 
+--
 -- Dumping data for table `details`
--- 
+--
 
 INSERT INTO `details` (`itemid`, `item`, `description`, `sale`, `expense`) VALUES (1, 'Accomodation', NULL, NULL, NULL),
 (2, 'Bar', NULL, NULL, NULL),
@@ -405,9 +405,9 @@ INSERT INTO `details` (`itemid`, `item`, `description`, `sale`, `expense`) VALUE
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table `doctypes`
--- 
+--
 
 CREATE TABLE `doctypes` (
   `doc_id` int(11) NOT NULL auto_increment,
@@ -420,9 +420,9 @@ CREATE TABLE `doctypes` (
   PRIMARY KEY  (`doc_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='InnoDB free: 120832 kB; InnoDB free: 120832 kB; InnoDB free:' AUTO_INCREMENT=22 ;
 
--- 
+--
 -- Dumping data for table `doctypes`
--- 
+--
 
 INSERT INTO `doctypes` (`doc_id`, `doc_code`, `doc_type`, `remarks`, `accounts`, `cooperative`, `payroll`) VALUES (1, 'RECEI', 'RECEIPT                  ', NULL, 1, 1, NULL),
 (2, 'INVOI', 'INVOICE                  ', NULL, 1, 1, NULL),
@@ -448,9 +448,9 @@ INSERT INTO `doctypes` (`doc_id`, `doc_code`, `doc_type`, `remarks`, `accounts`,
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table `guestbook`
--- 
+--
 
 CREATE TABLE `guestbook` (
   `gb_index` int(11) NOT NULL auto_increment,
@@ -462,9 +462,9 @@ CREATE TABLE `guestbook` (
   PRIMARY KEY  (`gb_index`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=9 ;
 
--- 
+--
 -- Dumping data for table `guestbook`
--- 
+--
 
 INSERT INTO `guestbook` (`gb_index`, `name`, `email`, `date`, `message`, `reply`) VALUES (1, 'Tony', 'tkazungu@kilifi.mimcom.net', '2006-03-29 16:46:39', 'good', NULL),
 (2, 'Metrine', 'msaisi@lycos.com', '2006-03-29 16:56:01', 'wddw', NULL),
@@ -477,9 +477,9 @@ INSERT INTO `guestbook` (`gb_index`, `name`, `email`, `date`, `message`, `reply`
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table `guests`
--- 
+--
 
 CREATE TABLE `guests` (
   `guestid` int(11) NOT NULL auto_increment,
@@ -499,9 +499,9 @@ CREATE TABLE `guests` (
   UNIQUE KEY `id` (`guestid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='InnoDB free: 121856 kB; InnoDB free: 115712 kB; InnoDB free:' AUTO_INCREMENT=7 ;
 
--- 
+--
 -- Dumping data for table `guests`
--- 
+--
 
 INSERT INTO `guests` (`guestid`, `lastname`, `firstname`, `middlename`, `pp_no`, `idno`, `countrycode`, `pobox`, `town`, `postal_code`, `phone`, `email`, `mobilephone`) VALUES (1, 'Kazungu', 'Tony', 'Iha', NULL, 13487317, 'KE', '938', 'Kilifi', '80108', '041-522482', 'tiha@taifaweb.net', '0733-716747'),
 (2, 'Mramba', 'Joseph', 'Kazungu', NULL, 13487316, 'KE', '389', 'Kilifi', '80108', '041-522482', 'jmramba@lycos.com', '0722-851632'),
@@ -512,9 +512,9 @@ INSERT INTO `guests` (`guestid`, `lastname`, `firstname`, `middlename`, `pp_no`,
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table `payment_mode`
--- 
+--
 
 CREATE TABLE `payment_mode` (
   `paymentid` int(11) NOT NULL auto_increment,
@@ -522,9 +522,9 @@ CREATE TABLE `payment_mode` (
   PRIMARY KEY  (`paymentid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='InnoDB free: 120832 kB' AUTO_INCREMENT=7 ;
 
--- 
+--
 -- Dumping data for table `payment_mode`
--- 
+--
 
 INSERT INTO `payment_mode` (`paymentid`, `payment_option`) VALUES (1, 'Cash'),
 (2, 'Credit Card'),
@@ -535,9 +535,9 @@ INSERT INTO `payment_mode` (`paymentid`, `payment_option`) VALUES (1, 'Cash'),
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table `php_session`
--- 
+--
 
 CREATE TABLE `php_session` (
   `session_id` varchar(32) NOT NULL default '',
@@ -549,16 +549,16 @@ CREATE TABLE `php_session` (
   KEY `last_updated` (`last_updated`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
--- 
+--
 -- Dumping data for table `php_session`
--- 
+--
 
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table `rates`
--- 
+--
 
 CREATE TABLE `rates` (
   `ratesid` int(11) NOT NULL auto_increment,
@@ -575,17 +575,17 @@ CREATE TABLE `rates` (
   PRIMARY KEY  (`ratesid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='InnoDB free: 120832 kB; InnoDB free: 120832 kB; InnoDB free:' AUTO_INCREMENT=2 ;
 
--- 
+--
 -- Dumping data for table `rates`
--- 
+--
 
 INSERT INTO `rates` (`ratesid`, `bookingtype`, `occupancy`, `rate_type`, `bo`, `bb`, `hb`, `fb`, `currency`, `date_started`, `date_stopped`) VALUES (1, 'D', 'S', 'R', '700', '950', '1550', '1950', 'Ksh.', '2006-07-01', '2006-07-09');
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table `reservation`
--- 
+--
 
 CREATE TABLE `reservation` (
   `reservation_id` int(11) NOT NULL auto_increment,
@@ -615,17 +615,17 @@ CREATE TABLE `reservation` (
   UNIQUE KEY `id` (`reservation_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='InnoDB free: 121856 kB; InnoDB free: 115712 kB; InnoDB free:' AUTO_INCREMENT=2 ;
 
--- 
+--
 -- Dumping data for table `reservation`
--- 
+--
 
 INSERT INTO `reservation` (`reservation_id`, `reserved_through`, `guestid`, `reservation_by`, `reservation_by_phone`, `datereserved`, `reserve_checkindate`, `reserve_checkoutdate`, `no_adults`, `no_child0_5`, `no_child6_12`, `no_babies`, `meal_plan`, `billing_instructions`, `deposit`, `agents_ac_no`, `voucher_no`, `reserved_by`, `date_reserved`, `confirmed_by`, `confirmed_date`, `roomid`, `billed`) VALUES (1, 'T', '3', NULL, NULL, '2006-08-29', '2006-08-31', '2006-09-04', 1, NULL, NULL, NULL, 'BB', NULL, '650.00', NULL, NULL, 2, NULL, NULL, NULL, 6, 1);
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table `rooms`
--- 
+--
 
 CREATE TABLE `rooms` (
   `roomid` int(11) NOT NULL auto_increment,
@@ -645,9 +645,9 @@ CREATE TABLE `rooms` (
   PRIMARY KEY  (`roomid`,`roomno`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='InnoDB free: 119808 kB; InnoDB free: 119808 kB; InnoDB free:' AUTO_INCREMENT=35 ;
 
--- 
+--
 -- Dumping data for table `rooms`
--- 
+--
 
 INSERT INTO `rooms` (`roomid`, `roomno`, `roomtypeid`, `roomname`, `noofrooms`, `occupancy`, `tv`, `aircondition`, `fun`, `safe`, `fridge`, `status`, `photo`, `filetype`) VALUES (1, 102, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'V', NULL, NULL),
 (2, 103, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'V', NULL, NULL),
@@ -686,9 +686,9 @@ INSERT INTO `rooms` (`roomid`, `roomno`, `roomtypeid`, `roomname`, `noofrooms`, 
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table `roomtype`
--- 
+--
 
 CREATE TABLE `roomtype` (
   `roomtypeid` int(11) NOT NULL auto_increment,
@@ -697,18 +697,18 @@ CREATE TABLE `roomtype` (
   PRIMARY KEY  (`roomtypeid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
 
--- 
+--
 -- Dumping data for table `roomtype`
--- 
+--
 
 INSERT INTO `roomtype` (`roomtypeid`, `roomtype`, `description`) VALUES (1, 'standard', NULL),
 (2, 'family', NULL);
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table `sessions`
--- 
+--
 
 CREATE TABLE `sessions` (
   `id_session` varchar(32) NOT NULL default '',
@@ -717,16 +717,16 @@ CREATE TABLE `sessions` (
   `data` text NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
--- 
+--
 -- Dumping data for table `sessions`
--- 
+--
 
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table `transactions`
--- 
+--
 
 CREATE TABLE `transactions` (
   `transno` int(11) NOT NULL auto_increment,
@@ -741,17 +741,17 @@ CREATE TABLE `transactions` (
   PRIMARY KEY  (`transno`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='Bill Postings; InnoDB free: 120832 kB; InnoDB free: 120832 k' AUTO_INCREMENT=2 ;
 
--- 
+--
 -- Dumping data for table `transactions`
--- 
+--
 
 INSERT INTO `transactions` (`transno`, `billno`, `doc_type`, `doc_no`, `doc_date`, `details`, `dr`, `cr`, `trans_date`) VALUES (1, 1, 'Reciept', 161, '2006-08-23', '1', NULL, '650.00', '2006-08-22 14:39:44');
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table `transtype`
--- 
+--
 
 CREATE TABLE `transtype` (
   `trans_id` int(11) NOT NULL auto_increment,
@@ -764,9 +764,9 @@ CREATE TABLE `transtype` (
   PRIMARY KEY  (`trans_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='InnoDB free: 120832 kB; InnoDB free: 120832 kB; InnoDB free:' AUTO_INCREMENT=9 ;
 
--- 
+--
 -- Dumping data for table `transtype`
--- 
+--
 
 INSERT INTO `transtype` (`trans_id`, `trans_code`, `trans_type`, `remarks`, `accounts`, `cooperative`, `payroll`) VALUES (1, 'RECEI', 'RECEIPT                  ', NULL, 1, 1, NULL),
 (2, 'PAYME', 'PAYMENTS                 ', NULL, 1, 1, NULL),
@@ -779,9 +779,9 @@ INSERT INTO `transtype` (`trans_id`, `trans_code`, `trans_type`, `remarks`, `acc
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table `users`
--- 
+--
 
 CREATE TABLE `users` (
   `userid` smallint(6) NOT NULL auto_increment,
@@ -811,20 +811,19 @@ CREATE TABLE `users` (
   KEY `names` (`fname`,`sname`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COMMENT='InnoDB free: 121856 kB; InnoDB free: 121856 kB; InnoDB free:' AUTO_INCREMENT=5 ;
 
--- 
+--
 -- Dumping data for table `users`
--- 
+--
 
-INSERT INTO `users` (`userid`, `fname`, `sname`, `loginname`, `pass`, `phone`, `mobile`, `fax`, `email`, `dateregistered`, `countrycode`, `admin`, `guest`, `reservation`, `booking`, `agents`, `rooms`, `billing`, `rates`, `lookup`, `reports`) VALUES (1, 'Tony', 'Kazungu', 'tiha', 'f9b96489e9fd87f2cac2addbe813b615', 735716747, 735716747, NULL, 'tkazungu@kilifi.mimcom.net', NULL, 112, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-(2, 'Tony', 'Iha', 'admin', '1b3231655cebb7a1f783eddf27d254ca', NULL, NULL, NULL, NULL, '2006-07-07', NULL, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
-(3, 'Mohamed', 'Said', 'msaid', 'b7b791e873f143d5318310e59022175d', NULL, NULL, NULL, NULL, '2006-07-11', NULL, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
-(4, 'Metrine', 'Saisi', 'msaisi', '3edfba58e66acf6f73742e7fbdb908c6', NULL, NULL, NULL, NULL, '2006-07-11', NULL, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0);
+INSERT INTO `users` (`userid`, `fname`, `sname`, `loginname`, `pass`, `phone`, `mobile`, `fax`, `email`, `dateregistered`, `countrycode`, `admin`, `guest`, `reservation`, `booking`, `agents`, `rooms`, `billing`, `rates`, `lookup`, `reports`) VALUES
+(1, 'Default', 'Admin', 'admin', '1b3231655cebb7a1f783eddf27d254ca', NULL, NULL, NULL, NULL, '2006-07-07', NULL, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+
 
 -- --------------------------------------------------------
 
--- 
+--
 -- Table structure for table `users_online`
--- 
+--
 
 CREATE TABLE `users_online` (
   `id` bigint(20) NOT NULL auto_increment,
@@ -837,9 +836,9 @@ CREATE TABLE `users_online` (
   KEY `timestamp` (`timestamp`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=602 ;
 
--- 
+--
 -- Dumping data for table `users_online`
--- 
+--
 
 INSERT INTO `users_online` (`id`, `timestamp`, `ip`, `file`) VALUES (591, 1143969163, '127.0.0.1', '/titanic/photogallery/photo.php'),
 (592, 1143969164, '127.0.0.1', '/titanic/photogallery/photo.php'),
